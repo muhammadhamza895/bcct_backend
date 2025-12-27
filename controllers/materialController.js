@@ -34,4 +34,75 @@ const createMaterial = async (req, res) => {
     }
 }
 
-export { getMaterial, createMaterial };
+const updateMaterial = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, type, currentStock, maxStock } = req.body;
+
+        if (!name || name.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: 'Name is required'
+            });
+        }
+
+        if (!type || type.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                message: 'Type is required'
+            });
+        }
+
+
+        const updateData = { name, type }
+        if (currentStock !== undefined) {
+            const parsedCurrentStock = parseInt(currentStock);
+
+            if (Number.isNaN(parsedCurrentStock) || parsedCurrentStock < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid currentStock value'
+                });
+            }
+
+            updateData['currentStock'] = parsedCurrentStock;
+        }
+
+        // Validate & convert maxStock
+        if (maxStock !== undefined) {
+            const parsedMaxStock = parseInt(maxStock);
+
+            if (Number.isNaN(parsedMaxStock) || parsedMaxStock < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid maxStock value'
+                });
+            }
+
+            updateData['maxStock'] = parsedMaxStock;
+        }
+        const updated_material = await MaterialsModel.findByIdAndUpdate(
+            id, updateData, { new: true });
+
+        if (!updated_material) {
+            return res.status(404).json({
+                success: false,
+                message: 'Material not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Material updated successfully',
+            updated_material
+        });
+    } catch (error) {
+        console.error('Error updating material:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating material'
+        });
+    }
+}
+
+export { getMaterial, createMaterial, updateMaterial };
