@@ -2,11 +2,11 @@ import mongoose from 'mongoose';
 
 const MaterialsSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    type: { 
-        type: String, 
-        required: true,
-        enum: ['paper', 'card']
-    },
+    // type: { 
+    //     type: String, 
+    //     required: true,
+    //     enum: ['paper', 'card']
+    // },
     measurement: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Measurement',
@@ -22,8 +22,8 @@ const MaterialsSchema = new mongoose.Schema({
         type: Number,
         default: 0   
     },
-    currentStock: { type: Number },
-    maxStock: { type: Number },
+    // currentStock: { type: Number },
+    // maxStock: { type: Number },
 });
 
 const MaterialsModel = mongoose.model('Material', MaterialsSchema);

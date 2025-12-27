@@ -1,4 +1,5 @@
 import MaterialsModel from '../models/materials.js';
+import { MeasurementModel } from '../models/measurement.js';
 
 const getMaterial = async (req, res) => {
     try {
@@ -19,23 +20,79 @@ const getMaterial = async (req, res) => {
 
 const createMaterial = async (req, res) => {
     try {
-        const { name, type, currentStock = 0, maxStock = 0 } = req.body;
+        let { name, measurement, unitQuantity = 0, extraSheets = 0 } = req.body;
 
+        const trimmedName = name?.trim();
 
-        const new_material = new MaterialsModel({
-            name,
-            type,
-            currentStock,
-            maxStock
+        if (!trimmedName) {
+            return res.status(400).json({
+                success: false,
+                message: 'Name is required'
+            });
+        }
+
+        if (!measurement) {
+            return res.status(400).json({
+                success: false,
+                message: 'Measurement unit is required'
+            });
+        }
+
+        if (unitQuantity < 0 || extraSheets < 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Quantities cannot be negative'
+            });
+        }
+
+        const measure = await MeasurementModel
+            .findById(measurement)
+            .select('sheetsPerUnit')
+            .lean();
+
+        if (!measure) {
+            return res.status(400).json({
+                success: false,
+                message: 'Measure unit not found'
+            });
+        }
+
+        const { sheetsPerUnit } = measure;
+
+        if (typeof sheetsPerUnit !== 'number' || sheetsPerUnit <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid measurement configuration'
+            });
+        }
+
+        if (extraSheets >= sheetsPerUnit) {
+            const extraNumberOfUnits = Math.floor(extraSheets / sheetsPerUnit);
+            unitQuantity += extraNumberOfUnits;
+            extraSheets -= extraNumberOfUnits * sheetsPerUnit;
+        }
+
+        const existingMaterial = await MaterialsModel.findOne({ name: trimmedName });
+        if (existingMaterial) {
+            return res.status(409).json({
+                success: false,
+                message: 'Material already exists'
+            });
+        }
+
+        const newMaterial = new MaterialsModel({
+            name: trimmedName,
+            measurement,
+            unitQuantity,
+            extraSheets
         });
 
-        await new_material.save();
-        // await appointment.populate(['propertyId', 'userId']);
+        await newMaterial.save();
 
         res.status(201).json({
             success: true,
             message: 'Material created successfully',
-            new_material
+            material: newMaterial
         });
     } catch (error) {
         console.error('Error creating material:', error);
@@ -44,7 +101,9 @@ const createMaterial = async (req, res) => {
             message: 'Error creating material'
         });
     }
-}
+};
+
+
 
 const updateMaterial = async (req, res) => {
     try {
