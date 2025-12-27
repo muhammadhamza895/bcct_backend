@@ -7,6 +7,21 @@ const MaterialsSchema = new mongoose.Schema({
         required: true,
         enum: ['paper', 'card']
     },
+    measurement: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Measurement',
+        required: true
+    },
+    unitQuantity: {
+        type: Number,
+        required: true,
+        default: 0   
+    },
+
+    extraSheets: {
+        type: Number,
+        default: 0   
+    },
     currentStock: { type: Number },
     maxStock: { type: Number },
 });
