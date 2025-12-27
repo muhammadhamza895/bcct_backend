@@ -9,6 +9,8 @@ import { materialRouter } from './routes/materialRouter.js';
 dotenv.config();
 const app = express();
 
+app.use(express.json())
+
 await connectdb()
 
 // API ROutes
