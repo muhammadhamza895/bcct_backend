@@ -105,4 +105,28 @@ const updateMaterial = async (req, res) => {
     }
 }
 
-export { getMaterial, createMaterial, updateMaterial };
+const deleteMaterial = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deleted_material = await MaterialsModel.findByIdAndDelete(id);
+        if (!deleted_material) {
+            return res.status(404).json({
+                success: false,
+                message: 'Material not found'
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: 'Material deleted successfully',
+            deleted_material
+        });
+    } catch (error) {
+        console.error('Error deleting material:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error deleting material'
+        });
+    }
+}
+
+export { getMaterial, createMaterial, updateMaterial, deleteMaterial };
