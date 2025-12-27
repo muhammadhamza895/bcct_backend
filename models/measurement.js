@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 const MeasurementSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -9,4 +11,6 @@ const MeasurementSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Measurement', MeasurementSchema);
+const MeasurementModel = mongoose.model('Measurement', MeasurementSchema);
+
+export { MeasurementModel }
