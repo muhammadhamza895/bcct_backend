@@ -1,8 +1,20 @@
 import MaterialsModel from '../models/materials.js';
 
 const getMaterial = async (req, res) => {
-    console.log('getMaterial route working')
-    res.send('router working')
+    try {
+        const materials = await MaterialsModel.find();
+        res.status(200).json({
+            success: true,
+            message: 'Materials fetched successfully',
+            materials
+        });
+    } catch (error) {
+        console.error('Error fetching materials:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching materials'
+        });
+    }
 }
 
 const createMaterial = async (req, res) => {
