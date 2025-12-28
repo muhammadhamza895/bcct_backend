@@ -2,26 +2,25 @@ import mongoose from 'mongoose';
 
 const MaterialsSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    // type: { 
-    //     type: String, 
-    //     required: true,
-    //     enum: ['paper', 'card']
-    // },
     measurementId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Measurement',
         required: true
     },
-    unitQuantity: {
-        type: Number,
-        required: true,
-        default: 0   
-    },
+    totalSheets : {
+        type : Number,
+        default : 0
+    }
+    // unitQuantity: {
+    //     type: Number,
+    //     required: true,
+    //     default: 0   
+    // },
 
-    extraSheets: {
-        type: Number,
-        default: 0   
-    },
+    // extraSheets: {
+    //     type: Number,
+    //     default: 0   
+    // },
     // currentStock: { type: Number },
     // maxStock: { type: Number },
 });

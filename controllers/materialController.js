@@ -62,9 +62,11 @@ const createMaterial = async (req, res) => {
 
         const sheetsPerUnit = req?.measure?.sheetsPerUnit
 
-        const {extraNumberOfUnits, subtractingSheets} = sheetToUnitConverter({extraSheets, sheetsPerUnit})
-        unitQuantity += extraNumberOfUnits
-        extraSheets -= subtractingSheets
+        // const {extraNumberOfUnits, subtractingSheets} = sheetToUnitConverter({extraSheets, sheetsPerUnit})
+        // unitQuantity += extraNumberOfUnits
+        // extraSheets -= subtractingSheets
+
+        const totalSheets = (unitQuantity * sheetsPerUnit) + extraSheets
 
         // if (extraSheets >= sheetsPerUnit) {
         //     const extraNumberOfUnits = Math.floor(extraSheets / sheetsPerUnit);
@@ -83,8 +85,9 @@ const createMaterial = async (req, res) => {
         const newMaterial = new MaterialsModel({
             name: trimmedName,
             measurementId,
-            unitQuantity,
-            extraSheets
+            totalSheets
+            // unitQuantity,
+            // extraSheets
         });
 
         await newMaterial.save();
