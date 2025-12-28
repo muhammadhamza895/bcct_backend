@@ -108,54 +108,85 @@ const createMaterial = async (req, res) => {
 const updateMaterial = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, type, currentStock, maxStock } = req.body;
+        let { name, measurement, unitQuantity, extraSheets } = req.body;
 
-        if (!name || name.trim() === '') {
+        const trimmedName = name?.trim();
+
+        if (!trimmedName) {
             return res.status(400).json({
                 success: false,
                 message: 'Name is required'
             });
         }
 
-        if (!type || type.trim() === '') {
+        if (!measurement) {
             return res.status(400).json({
                 success: false,
-                message: 'Type is required'
+                message: 'Measurement unit is required'
             });
         }
 
-
-        const updateData = { name, type }
-        if (currentStock !== undefined) {
-            const parsedCurrentStock = parseInt(currentStock);
-
-            if (Number.isNaN(parsedCurrentStock) || parsedCurrentStock < 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid currentStock value'
-                });
-            }
-
-            updateData['currentStock'] = parsedCurrentStock;
+        if ((unitQuantity ?? 0) < 0 || (extraSheets ?? 0) < 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Quantities cannot be negative'
+            });
         }
 
-        // Validate & convert maxStock
-        if (maxStock !== undefined) {
-            const parsedMaxStock = parseInt(maxStock);
+        const measure = await MeasurementModel
+            .findById(measurement)
+            .select('sheetsPerUnit')
+            .lean();
 
-            if (Number.isNaN(parsedMaxStock) || parsedMaxStock < 0) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid maxStock value'
-                });
-            }
-
-            updateData['maxStock'] = parsedMaxStock;
+        if (!measure) {
+            return res.status(400).json({
+                success: false,
+                message: 'Measure unit not found'
+            });
         }
-        const updated_material = await MaterialsModel.findByIdAndUpdate(
-            id, updateData, { new: true });
 
-        if (!updated_material) {
+        const { sheetsPerUnit } = measure;
+
+        if (typeof sheetsPerUnit !== 'number' || sheetsPerUnit <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid measurement configuration'
+            });
+        }
+
+        let finalUnitQuantity = unitQuantity ?? 0;
+        let finalExtraSheets = extraSheets ?? 0;
+
+        if (finalExtraSheets >= sheetsPerUnit) {
+            const extraUnits = Math.floor(finalExtraSheets / sheetsPerUnit);
+            finalUnitQuantity += extraUnits;
+            finalExtraSheets -= extraUnits * sheetsPerUnit;
+        }
+
+        const existingMaterial = await MaterialsModel.findOne({
+            name: trimmedName,
+            _id: { $ne: id }
+        });
+
+        if (existingMaterial) {
+            return res.status(409).json({
+                success: false,
+                message: 'Material with this name already exists'
+            });
+        }
+
+        const updatedMaterial = await MaterialsModel.findByIdAndUpdate(
+            id,
+            {
+                name: trimmedName,
+                measurement,
+                unitQuantity: finalUnitQuantity,
+                extraSheets: finalExtraSheets
+            },
+            { new: true }
+        );
+
+        if (!updatedMaterial) {
             return res.status(404).json({
                 success: false,
                 message: 'Material not found'
@@ -165,7 +196,7 @@ const updateMaterial = async (req, res) => {
         res.status(200).json({
             success: true,
             message: 'Material updated successfully',
-            updated_material
+            material: updatedMaterial
         });
     } catch (error) {
         console.error('Error updating material:', error);
@@ -174,7 +205,7 @@ const updateMaterial = async (req, res) => {
             message: 'Error updating material'
         });
     }
-}
+};
 
 const deleteMaterial = async (req, res) => {
     try {
