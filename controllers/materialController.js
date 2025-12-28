@@ -158,10 +158,11 @@ const updateMaterial = async (req, res) => {
         // }
 
         const sheetsPerUnit = req?.measure?.sheetsPerUnit
+        const totalSheets = (unitQuantity * sheetsPerUnit) + extraSheets
 
-        const {extraNumberOfUnits, subtractingSheets} = sheetToUnitConverter({extraSheets, sheetsPerUnit})
-        unitQuantity += extraNumberOfUnits
-        extraSheets -= subtractingSheets
+        // const {extraNumberOfUnits, subtractingSheets} = sheetToUnitConverter({extraSheets, sheetsPerUnit})
+        // unitQuantity += extraNumberOfUnits
+        // extraSheets -= subtractingSheets
 
         // let finalUnitQuantity = unitQuantity ?? 0;
         // let finalExtraSheets = extraSheets ?? 0;
@@ -189,8 +190,9 @@ const updateMaterial = async (req, res) => {
             {
                 name: trimmedName,
                 measurementId,
-                unitQuantity,
-                extraSheets
+                totalSheets
+                // unitQuantity,
+                // extraSheets
             },
             { new: true }
         );
