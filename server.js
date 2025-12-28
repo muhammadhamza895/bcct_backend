@@ -11,15 +11,28 @@ dotenv.config();
 
 const app = express();
 
+await connectdb()
 app.use(express.json())
 
-await connectdb()
+try {
+    await connectdb();
+    console.log('Database connected');
+} catch (error) {
+    console.error('Database connection failed:', error);
+    process.exit(1);
+}
+
 
 // API ROutes
 app.use('/material', materialRouter);
 app.use('/measurement', measurementRouter);
 
 const port = process.env.PORT || 8080;
+
+app.get('/', (req, res) => {
+    res.status(200).json({ success: true, message: 'API is running' });
+});
+
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
