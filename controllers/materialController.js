@@ -3,7 +3,7 @@ import { MeasurementModel } from '../models/measurement.js';
 
 const getMaterial = async (req, res) => {
     try {
-        const materials = await MaterialsModel.find();
+        const materials = await MaterialsModel.find().populate('measurement');
         res.status(200).json({
             success: true,
             message: 'Materials fetched successfully',
