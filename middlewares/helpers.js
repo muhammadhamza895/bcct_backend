@@ -102,10 +102,10 @@ const uniqueMeasurementVerifier = async (req, res, next) => {
     }
 };
 
-const sheetToUnitConverter=({extraSheets = 0, sheetsPerUnit = 1})=>{
-    const extraNumberOfUnits = Math.floor(extraSheets / sheetsPerUnit);
-    const subtractingSheets = extraNumberOfUnits * sheetsPerUnit
-    return {extraNumberOfUnits, subtractingSheets};
+const sheetToUnitConverter=({sheetsPerUnit = 1, totalSheets = 1})=>{
+    const unitQuantity = Math.floor(totalSheets / sheetsPerUnit);
+    const extraSheets = totalSheets - (unitQuantity * sheetsPerUnit)
+    return {unitQuantity, extraSheets};
 }
 
 const calculateTotalSheets=({unitQuantity, sheetsPerUnit, extraSheets})=>{

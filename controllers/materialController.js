@@ -5,10 +5,25 @@ import { calculateTotalSheets, sheetToUnitConverter } from '../middlewares/helpe
 const getMaterial = async (req, res) => {
     try {
         const materials = await MaterialsModel.find().populate('measurementId');
+
+        const data = materials?.map(val=>{
+            const sheetsPerUnit = val?.measurementId?.sheetsPerUnit
+            const totalSheets = val?.totalSheets
+
+
+            const unitsSheets = sheetToUnitConverter({sheetsPerUnit, totalSheets})
+            return {
+                name : val?.name,
+                measurement : val?.measurementId?.name,
+                unitQuantity : unitsSheets?.unitQuantity,
+                extraSheets : unitsSheets?.extraSheets
+            }
+        })
+
         res.status(200).json({
             success: true,
             message: 'Materials fetched successfully',
-            materials
+            materials : data
         });
     } catch (error) {
         console.error('Error fetching materials:', error);
