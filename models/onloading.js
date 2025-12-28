@@ -20,6 +20,6 @@ const OnloadingSchema = new mongoose.Schema({
     },
 });
 
-const MaterialsModel = mongoose.model('Onloading', OnloadingSchema);
+const OnloadingModel = mongoose.model('Onloading', OnloadingSchema);
 
-export default MaterialsModel;
+export default OnloadingModel;
