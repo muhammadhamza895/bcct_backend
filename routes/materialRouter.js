@@ -12,7 +12,7 @@ const materialRouter = express.Router();
 // Routes
 materialRouter.get('/get-material', getMaterial);
 materialRouter.post('/create-material', measureUnitVerifier, quantityVerification, createMaterial);
-materialRouter.put('/update-material/:id', updateMaterial);
+materialRouter.put('/update-material/:id', measureUnitVerifier, quantityVerification, updateMaterial);
 materialRouter.delete('/delete-material/:id', deleteMaterial);
 
 export { materialRouter };

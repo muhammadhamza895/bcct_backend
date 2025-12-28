@@ -4,7 +4,7 @@ import { sheetToUnitConverter } from '../middlewares/helpers.js';
 
 const getMaterial = async (req, res) => {
     try {
-        const materials = await MaterialsModel.find().populate('measurement');
+        const materials = await MaterialsModel.find().populate('measurementId');
         res.status(200).json({
             success: true,
             message: 'Materials fetched successfully',
@@ -108,7 +108,7 @@ const createMaterial = async (req, res) => {
 const updateMaterial = async (req, res) => {
     try {
         const { id } = req.params;
-        let { name, measurement, unitQuantity, extraSheets } = req.body;
+        let { name, measurementId, unitQuantity, extraSheets } = req.body;
 
         const trimmedName = name?.trim();
 
@@ -119,49 +119,55 @@ const updateMaterial = async (req, res) => {
             });
         }
 
-        if (!measurement) {
-            return res.status(400).json({
-                success: false,
-                message: 'Measurement unit is required'
-            });
-        }
+        // if (!measurement) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Measurement unit is required'
+        //     });
+        // }
 
-        if ((unitQuantity ?? 0) < 0 || (extraSheets ?? 0) < 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'Quantities cannot be negative'
-            });
-        }
+        // if ((unitQuantity ?? 0) < 0 || (extraSheets ?? 0) < 0) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Quantities cannot be negative'
+        //     });
+        // }
 
-        const measure = await MeasurementModel
-            .findById(measurement)
-            .select('sheetsPerUnit')
-            .lean();
+        // const measure = await MeasurementModel
+        //     .findById(measurement)
+        //     .select('sheetsPerUnit')
+        //     .lean();
 
-        if (!measure) {
-            return res.status(400).json({
-                success: false,
-                message: 'Measure unit not found'
-            });
-        }
+        // if (!measure) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Measure unit not found'
+        //     });
+        // }
 
-        const { sheetsPerUnit } = measure;
+        // const { sheetsPerUnit } = measure;
 
-        if (typeof sheetsPerUnit !== 'number' || sheetsPerUnit <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid measurement configuration'
-            });
-        }
+        // if (typeof sheetsPerUnit !== 'number' || sheetsPerUnit <= 0) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Invalid measurement configuration'
+        //     });
+        // }
 
-        let finalUnitQuantity = unitQuantity ?? 0;
-        let finalExtraSheets = extraSheets ?? 0;
+        const sheetsPerUnit = req?.measure?.sheetsPerUnit
 
-        if (finalExtraSheets >= sheetsPerUnit) {
-            const extraUnits = Math.floor(finalExtraSheets / sheetsPerUnit);
-            finalUnitQuantity += extraUnits;
-            finalExtraSheets -= extraUnits * sheetsPerUnit;
-        }
+        const {extraNumberOfUnits, subtractingSheets} = sheetToUnitConverter({extraSheets, sheetsPerUnit})
+        unitQuantity += extraNumberOfUnits
+        extraSheets -= subtractingSheets
+
+        // let finalUnitQuantity = unitQuantity ?? 0;
+        // let finalExtraSheets = extraSheets ?? 0;
+
+        // if (finalExtraSheets >= sheetsPerUnit) {
+        //     const extraUnits = Math.floor(finalExtraSheets / sheetsPerUnit);
+        //     finalUnitQuantity += extraUnits;
+        //     finalExtraSheets -= extraUnits * sheetsPerUnit;
+        // }
 
         const existingMaterial = await MaterialsModel.findOne({
             name: trimmedName,
@@ -179,9 +185,9 @@ const updateMaterial = async (req, res) => {
             id,
             {
                 name: trimmedName,
-                measurement,
-                unitQuantity: finalUnitQuantity,
-                extraSheets: finalExtraSheets
+                measurementId,
+                unitQuantity,
+                extraSheets
             },
             { new: true }
         );
