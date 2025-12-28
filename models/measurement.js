@@ -7,7 +7,8 @@ const MeasurementSchema = new mongoose.Schema({
     },
     sheetsPerUnit: {
         type: Number,
-        required: true
+        required: true,
+        default: 1,
     }
 });
 
