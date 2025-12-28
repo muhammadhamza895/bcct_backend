@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const OnloadingSchema = new mongoose.Schema({
-    papetType: {
+    materialId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Material',
         required: true

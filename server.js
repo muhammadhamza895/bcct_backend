@@ -6,12 +6,13 @@ import connectdb from './config/db.js';
 // ROUTERS
 import { materialRouter } from './routes/materialRouter.js';
 import { measurementRouter } from './routes/measurementRouter.js';
+import { onloadingRouter } from './routes/onloadingRouter.js';
 
 dotenv.config();
 
 const app = express();
 
-await connectdb()
+app.use(cors());
 app.use(express.json())
 
 try {
@@ -26,6 +27,7 @@ try {
 // API ROutes
 app.use('/material', materialRouter);
 app.use('/measurement', measurementRouter);
+app.use('/onloading', onloadingRouter);
 
 const port = process.env.PORT || 8080;
 

@@ -22,22 +22,24 @@ const createMeasurement = async (req, res) => {
     try {
         const { name, sheetsPerUnit } = req.body;
 
-        if (!name || name.trim() === '') {
-            return res.status(400).json({
-                success: false,
-                message: 'Name is required'
-            });
-        }
+        // if (!name || name.trim() === '') {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Name is required'
+        //     });
+        // }
 
-        const parsedSheetsPerUnit = parseInt(sheetsPerUnit);
-        if (Number.isNaN(parsedSheetsPerUnit) || parsedSheetsPerUnit <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid sheetsPerUnit value'
-            });
-        }
 
-        const newMeasurement = new MeasurementModel({ name, sheetsPerUnit: parsedSheetsPerUnit });
+
+        // const parsedSheetsPerUnit = parseInt(sheetsPerUnit);
+        // if (Number.isNaN(parsedSheetsPerUnit) || parsedSheetsPerUnit <= 0) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Invalid sheetsPerUnit value'
+        //     });
+        // }
+
+        const newMeasurement = new MeasurementModel({ name, sheetsPerUnit });
         await newMeasurement.save();
 
         res.status(201).json({
@@ -59,23 +61,15 @@ const updateMeasurement = async (req, res) => {
     try {
         const { id } = req.params;
         const { name, sheetsPerUnit } = req.body;
+        // const parsedSheetsPerUnit = parseInt(sheetsPerUnit);
+        // if (Number.isNaN(parsedSheetsPerUnit) || parsedSheetsPerUnit <= 0) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Invalid sheetsPerUnit value'
+        //     });
+        // }
 
-        if (!name || name.trim() === '') {
-            return res.status(400).json({
-                success: false,
-                message: 'Name is required'
-            });
-        }
-
-        const parsedSheetsPerUnit = parseInt(sheetsPerUnit);
-        if (Number.isNaN(parsedSheetsPerUnit) || parsedSheetsPerUnit <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid sheetsPerUnit value'
-            });
-        }
-
-        const updatedMeasurement = await MeasurementModel.findByIdAndUpdate(id, { name, sheetsPerUnit: parsedSheetsPerUnit }, { new: true });
+        const updatedMeasurement = await MeasurementModel.findByIdAndUpdate(id, { name, sheetsPerUnit }, { new: true });
 
         res.status(200).json({
             success: true,
