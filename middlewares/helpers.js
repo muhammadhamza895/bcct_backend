@@ -108,4 +108,8 @@ const sheetToUnitConverter=({extraSheets = 0, sheetsPerUnit = 1})=>{
     return {extraNumberOfUnits, subtractingSheets};
 }
 
-export { quantityVerification, sheetsPerUnitVerification, uniqueMeasurementVerifier, sheetToUnitConverter };
+const calculateTotalSheets=({unitQuantity, sheetsPerUnit, extraSheets})=>{
+    return  (unitQuantity * sheetsPerUnit) + extraSheets
+}
+
+export { quantityVerification, sheetsPerUnitVerification, uniqueMeasurementVerifier, sheetToUnitConverter, calculateTotalSheets };

@@ -1,6 +1,6 @@
 import MaterialsModel from '../models/materials.js';
 import { MeasurementModel } from '../models/measurement.js';
-import { sheetToUnitConverter } from '../middlewares/helpers.js';
+import { calculateTotalSheets, sheetToUnitConverter } from '../middlewares/helpers.js';
 
 const getMaterial = async (req, res) => {
     try {
@@ -32,47 +32,8 @@ const createMaterial = async (req, res) => {
             });
         }
 
-        // if (!measurementId) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: 'Measurement unit is required'
-        //     });
-        // }
-
-        // const measure = await MeasurementModel
-        //     .findById(measurementId)
-        //     .select('sheetsPerUnit')
-        //     .lean();
-
-        // if (!measure) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: 'Measure unit not found'
-        //     });
-        // }
-
-        // const { sheetsPerUnit } = req.measure;
-
-        // if (typeof sheetsPerUnit !== 'number' || sheetsPerUnit <= 0) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: 'Invalid measurement configuration'
-        //     });
-        // }
-
         const sheetsPerUnit = req?.measure?.sheetsPerUnit
-
-        // const {extraNumberOfUnits, subtractingSheets} = sheetToUnitConverter({extraSheets, sheetsPerUnit})
-        // unitQuantity += extraNumberOfUnits
-        // extraSheets -= subtractingSheets
-
-        const totalSheets = (unitQuantity * sheetsPerUnit) + extraSheets
-
-        // if (extraSheets >= sheetsPerUnit) {
-        //     const extraNumberOfUnits = Math.floor(extraSheets / sheetsPerUnit);
-        //     unitQuantity += extraNumberOfUnits;
-        //     extraSheets -= extraNumberOfUnits * sheetsPerUnit;
-        // }
+        const totalSheets = calculateTotalSheets({unitQuantity, sheetsPerUnit, extraSheets})
 
         const existingMaterial = await MaterialsModel.findOne({ name: trimmedName });
         if (existingMaterial) {
@@ -86,8 +47,6 @@ const createMaterial = async (req, res) => {
             name: trimmedName,
             measurementId,
             totalSheets
-            // unitQuantity,
-            // extraSheets
         });
 
         await newMaterial.save();
@@ -106,8 +65,6 @@ const createMaterial = async (req, res) => {
     }
 };
 
-
-
 const updateMaterial = async (req, res) => {
     try {
         const { id } = req.params;
@@ -122,56 +79,8 @@ const updateMaterial = async (req, res) => {
             });
         }
 
-        // if (!measurement) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: 'Measurement unit is required'
-        //     });
-        // }
-
-        // if ((unitQuantity ?? 0) < 0 || (extraSheets ?? 0) < 0) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: 'Quantities cannot be negative'
-        //     });
-        // }
-
-        // const measure = await MeasurementModel
-        //     .findById(measurement)
-        //     .select('sheetsPerUnit')
-        //     .lean();
-
-        // if (!measure) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: 'Measure unit not found'
-        //     });
-        // }
-
-        // const { sheetsPerUnit } = measure;
-
-        // if (typeof sheetsPerUnit !== 'number' || sheetsPerUnit <= 0) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: 'Invalid measurement configuration'
-        //     });
-        // }
-
         const sheetsPerUnit = req?.measure?.sheetsPerUnit
-        const totalSheets = (unitQuantity * sheetsPerUnit) + extraSheets
-
-        // const {extraNumberOfUnits, subtractingSheets} = sheetToUnitConverter({extraSheets, sheetsPerUnit})
-        // unitQuantity += extraNumberOfUnits
-        // extraSheets -= subtractingSheets
-
-        // let finalUnitQuantity = unitQuantity ?? 0;
-        // let finalExtraSheets = extraSheets ?? 0;
-
-        // if (finalExtraSheets >= sheetsPerUnit) {
-        //     const extraUnits = Math.floor(finalExtraSheets / sheetsPerUnit);
-        //     finalUnitQuantity += extraUnits;
-        //     finalExtraSheets -= extraUnits * sheetsPerUnit;
-        // }
+        const totalSheets = calculateTotalSheets({unitQuantity, sheetsPerUnit, extraSheets})
 
         const existingMaterial = await MaterialsModel.findOne({
             name: trimmedName,
@@ -191,8 +100,6 @@ const updateMaterial = async (req, res) => {
                 name: trimmedName,
                 measurementId,
                 totalSheets
-                // unitQuantity,
-                // extraSheets
             },
             { new: true }
         );
