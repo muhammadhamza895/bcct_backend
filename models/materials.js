@@ -7,7 +7,7 @@ const MaterialsSchema = new mongoose.Schema({
     //     required: true,
     //     enum: ['paper', 'card']
     // },
-    measurement: {
+    measurementId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Measurement',
         required: true

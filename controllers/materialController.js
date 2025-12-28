@@ -1,5 +1,6 @@
 import MaterialsModel from '../models/materials.js';
 import { MeasurementModel } from '../models/measurement.js';
+import { sheetToUnitConverter } from '../middlewares/helpers.js';
 
 const getMaterial = async (req, res) => {
     try {
@@ -20,7 +21,7 @@ const getMaterial = async (req, res) => {
 
 const createMaterial = async (req, res) => {
     try {
-        let { name, measurement, unitQuantity = 0, extraSheets = 0 } = req.body;
+        let { name, measurementId, unitQuantity = 0, extraSheets = 0 } = req.body;
 
         const trimmedName = name?.trim();
 
@@ -31,58 +32,57 @@ const createMaterial = async (req, res) => {
             });
         }
 
-        if (!measurement) {
-            return res.status(400).json({
-                success: false,
-                message: 'Measurement unit is required'
-            });
-        }
+        // if (!measurementId) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Measurement unit is required'
+        //     });
+        // }
 
-        if (unitQuantity < 0 || extraSheets < 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'Quantities cannot be negative'
-            });
-        }
+        // const measure = await MeasurementModel
+        //     .findById(measurementId)
+        //     .select('sheetsPerUnit')
+        //     .lean();
 
-        const measure = await MeasurementModel
-            .findById(measurement)
-            .select('sheetsPerUnit')
-            .lean();
+        // if (!measure) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Measure unit not found'
+        //     });
+        // }
 
-        if (!measure) {
-            return res.status(400).json({
-                success: false,
-                message: 'Measure unit not found'
-            });
-        }
+        // const { sheetsPerUnit } = req.measure;
 
-        const { sheetsPerUnit } = measure;
+        // if (typeof sheetsPerUnit !== 'number' || sheetsPerUnit <= 0) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Invalid measurement configuration'
+        //     });
+        // }
 
-        if (typeof sheetsPerUnit !== 'number' || sheetsPerUnit <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid measurement configuration'
-            });
-        }
+        const sheetsPerUnit = req?.measure?.sheetsPerUnit
 
-        if (extraSheets >= sheetsPerUnit) {
-            const extraNumberOfUnits = Math.floor(extraSheets / sheetsPerUnit);
-            unitQuantity += extraNumberOfUnits;
-            extraSheets -= extraNumberOfUnits * sheetsPerUnit;
-        }
+        const {extraNumberOfUnits, subtractingSheets} = sheetToUnitConverter({extraSheets, sheetsPerUnit})
+        unitQuantity += extraNumberOfUnits
+        extraSheets -= subtractingSheets
+
+        // if (extraSheets >= sheetsPerUnit) {
+        //     const extraNumberOfUnits = Math.floor(extraSheets / sheetsPerUnit);
+        //     unitQuantity += extraNumberOfUnits;
+        //     extraSheets -= extraNumberOfUnits * sheetsPerUnit;
+        // }
 
         const existingMaterial = await MaterialsModel.findOne({ name: trimmedName });
         if (existingMaterial) {
             return res.status(409).json({
                 success: false,
-                message: 'Material already exists'
+                message: 'Material already exists with this name'
             });
         }
 
         const newMaterial = new MaterialsModel({
             name: trimmedName,
-            measurement,
+            measurementId,
             unitQuantity,
             extraSheets
         });

@@ -43,7 +43,7 @@ const quantityVerification = (req, res, next) => {
 
 const sheetsPerUnitVerification = (req, res, next) => {
     try {
-        const { sheetsPerUnit } = req.body;
+        const sheetsPerUnit = req.body?.sheetsPerUnit ?? req?.measure?.sheetsPerUnit;
 
         const parsedSheetsPerUnit = parseInt(sheetsPerUnit);
         if (Number.isNaN(parsedSheetsPerUnit) || parsedSheetsPerUnit <= 0) {
@@ -102,4 +102,10 @@ const uniqueMeasurementVerifier = async (req, res, next) => {
     }
 };
 
-export { quantityVerification, sheetsPerUnitVerification, uniqueMeasurementVerifier };
+const sheetToUnitConverter=({extraSheets = 0, sheetsPerUnit = 1})=>{
+    const extraNumberOfUnits = Math.floor(extraSheets / sheetsPerUnit);
+    const subtractingSheets = extraNumberOfUnits * sheetsPerUnit
+    return {extraNumberOfUnits, subtractingSheets};
+}
+
+export { quantityVerification, sheetsPerUnitVerification, uniqueMeasurementVerifier, sheetToUnitConverter };
