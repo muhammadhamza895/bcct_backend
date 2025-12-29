@@ -2,7 +2,7 @@ import { MeasurementModel } from '../models/measurement.js';
 
 const getMeasurement = async (req, res) => {
     try {
-        const measurements = await MeasurementModel.find().populate('measurementId');
+        const measurements = await MeasurementModel.find();
         res.status(200).json({
             success: true,
             message: 'Measurements fetched successfully',
