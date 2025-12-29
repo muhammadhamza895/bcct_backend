@@ -13,6 +13,7 @@ const getMaterial = async (req, res) => {
 
             const unitsSheets = sheetToUnitConverter({sheetsPerUnit, totalSheets})
             return {
+                _id : val?._id,
                 name : val?.name,
                 measurement : val?.measurementId?.name,
                 unitQuantity : unitsSheets?.unitQuantity,
