@@ -15,7 +15,7 @@ const getMaterial = async (req, res) => {
             return {
                 _id : val?._id,
                 name : val?.name,
-                measurement : val?.measurementId?.name,
+                measurement : val?.measurementId?.name || 'No unit',
                 unitQuantity : unitsSheets?.unitQuantity,
                 extraSheets : unitsSheets?.extraSheets
             }
@@ -61,7 +61,7 @@ const createMaterial = async (req, res) => {
 
         const newMaterial = new MaterialsModel({
             name: trimmedName,
-            measurementId,
+            measurementId : measurementId || null,
             totalSheets
         });
 

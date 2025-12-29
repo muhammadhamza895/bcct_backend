@@ -5,7 +5,10 @@ const MaterialsSchema = new mongoose.Schema({
     measurementId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Measurement',
-        required: true
+        default: null,
+        set: (v) => {
+            return mongoose.Types.ObjectId.isValid(v) ? v : null;
+        }
     },
     totalSheets : {
         type : Number,

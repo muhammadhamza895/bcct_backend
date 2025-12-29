@@ -45,11 +45,12 @@ const measureUnitVerifier= async(req, res, next)=>{
     try {
         let { measurementId } = req.body;
 
-        if (!measurementId) {
-            return res.status(400).json({
-                success: false,
-                message: 'Measurement unit is required'
-            });
+        if (
+            !measurementId ||
+            !mongoose.Types.ObjectId.isValid(measurementId)
+        ) {
+            req.measure = { sheetsPerUnit: 1 };
+            return next();
         }
 
         const measure = await MeasurementModel
@@ -58,10 +59,10 @@ const measureUnitVerifier= async(req, res, next)=>{
             .lean();
 
         if (!measure) {
-            return res.status(400).json({
-                success: false,
-                message: 'Measure unit not found'
-            });
+            req.measure = {
+                sheetsPerUnit : 1,
+            }
+            next()
         }
 
         req.measure = measure
