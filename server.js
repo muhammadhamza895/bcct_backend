@@ -7,6 +7,7 @@ import connectdb from './config/db.js';
 import { materialRouter } from './routes/materialRouter.js';
 import { measurementRouter } from './routes/measurementRouter.js';
 import { onloadingRouter } from './routes/onloadingRouter.js';
+import { userrouter } from './routes/userRouter.js';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ try {
 app.use('/material', materialRouter);
 app.use('/measurement', measurementRouter);
 app.use('/onloading', onloadingRouter);
+app.use('/user', userrouter);
 
 const port = process.env.PORT || 8080;
 

@@ -52,7 +52,7 @@ const sheetsPerUnitVerification = (req, res, next) => {
                 message: 'Invalid sheetsPerUnit value'
             });
         }
-        
+
         req.body.sheetsPerUnit = parsedSheetsPerUnit;
         next();
     } catch (error) {
@@ -81,7 +81,6 @@ const uniqueMeasurementVerifier = async (req, res, next) => {
         if (id) {
             query._id = { $ne: id };
         }
-        console.log({query})
 
         const existingMeasure = await MeasurementModel.findOne(query);
 
@@ -102,14 +101,39 @@ const uniqueMeasurementVerifier = async (req, res, next) => {
     }
 };
 
-const sheetToUnitConverter=({sheetsPerUnit = 1, totalSheets = 1})=>{
+const sheetToUnitConverter = ({ sheetsPerUnit = 1, totalSheets = 1 }) => {
     const unitQuantity = Math.floor(totalSheets / sheetsPerUnit);
     const extraSheets = totalSheets - (unitQuantity * sheetsPerUnit)
-    return {unitQuantity, extraSheets};
+    return { unitQuantity, extraSheets };
 }
 
-const calculateTotalSheets=({unitQuantity, sheetsPerUnit, extraSheets})=>{
-    return  (unitQuantity * sheetsPerUnit) + extraSheets
+const calculateTotalSheets = ({ unitQuantity, sheetsPerUnit, extraSheets }) => {
+    return (unitQuantity * sheetsPerUnit) + extraSheets
 }
 
-export { quantityVerification, sheetsPerUnitVerification, uniqueMeasurementVerifier, sheetToUnitConverter, calculateTotalSheets };
+
+const nameChecker = (req, res, next) => {
+    const trimmedName = req?.body?.name?.trim();
+
+    if (!trimmedName) {
+        return res.status(400).json({
+            success: false,
+            message: 'Name is required'
+        });
+    }
+    next()
+}
+
+const passChecker = (req, res, next) => {
+    const password = req?.body?.password?.trim();
+
+    if (!password) {
+        return res.status(400).json({
+            success: false,
+            message: 'password is required'
+        });
+    }
+    next()
+}
+
+export { quantityVerification, sheetsPerUnitVerification, uniqueMeasurementVerifier, sheetToUnitConverter, calculateTotalSheets, nameChecker, passChecker };
