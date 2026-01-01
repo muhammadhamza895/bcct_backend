@@ -8,6 +8,7 @@ import { materialRouter } from './routes/materialRouter.js';
 import { measurementRouter } from './routes/measurementRouter.js';
 import { onloadingRouter } from './routes/onloadingRouter.js';
 import { userrouter } from './routes/userRouter.js';
+import { jobRouter } from './routes/jobRouter.js';
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use('/material', materialRouter);
 app.use('/measurement', measurementRouter);
 app.use('/onloading', onloadingRouter);
 app.use('/user', userrouter);
+app.use('/job', jobRouter);
 
 const port = process.env.PORT || 8080;
 

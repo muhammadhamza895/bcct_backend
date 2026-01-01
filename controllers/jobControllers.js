@@ -1,30 +1,60 @@
-import { JobModel } from "../models/jobs";
+import { JobModel } from "../models/jobs.js";
 
 export const getJobsByPage = async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 10;
-    const skip = (page - 1) * limit;
+    try {
+        const page = parseInt(req.params.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
 
-    const jobs = await JobModel.find()
-      .sort({ createdAt: -1 }) 
-      .skip(skip)
-      .limit(limit);
+        const jobs = await JobModel.find()
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
-    const totalJobs = await JobModel.countDocuments();
+        const totalJobs = await JobModel.countDocuments();
 
-    res.status(200).json({
-      success: true,
-      page,
-      totalPages: Math.ceil(totalJobs / limit),
-      totalJobs,
-      jobs
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch jobs",
-      error: error.message
-    });
-  }
+        res.status(200).json({
+            success: true,
+            page,
+            totalPages: Math.ceil(totalJobs / limit),
+            totalJobs,
+            jobs
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch jobs",
+            error: error.message
+        });
+    }
+};
+
+export const createJob = async (req, res) => {
+    try {
+        const { job_id, department, tasks } = req.body;
+
+        const job = await JobModel.create({
+            job_id,
+            department,
+            tasks
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Job created successfully",
+            job
+        });
+    } catch (error) {
+        if (error.code === 11000 && error.keyPattern?.job_id) {
+            return res.status(409).json({
+                success: false,
+                message: "Job Id already exists"
+            });
+        }
+        res.status(500).json({
+            success: false,
+            message: "Failed to create job",
+            error: error.message
+        });
+    }
 };
