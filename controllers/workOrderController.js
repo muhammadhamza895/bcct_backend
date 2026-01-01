@@ -31,12 +31,13 @@ export const getWorkOrdersByPage = async (req, res) => {
 
 export const createWorkOrder = async (req, res) => {
   try {
-    const { job, description, priority, deliveryDate } = req.body;
+    const { job, description, priority,tasks, deliveryDate } = req.body;
 
     const workOrder = await WorkOrderModel.create({
       job,
       description,
       priority,
+      tasks,
       deliveryDate
     });
 
@@ -54,7 +55,40 @@ export const createWorkOrder = async (req, res) => {
   }
 };
 
-export const updateWorkOrder = async (req, res) => {
+export const updateWorkOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const updatedWorkOrder = await WorkOrderModel.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedWorkOrder) {
+      return res.status(404).json({
+        success: false,
+        message: "Work order not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Work order status updated successfully",
+      workOrder: updatedWorkOrder
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update work order status",
+      error: error.message
+    });
+  }
+};
+
+
+export const editWorkOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const { job, description, priority, deliveryDate, status } = req.body;
@@ -95,4 +129,6 @@ export const updateWorkOrder = async (req, res) => {
     });
   }
 };
+
+
 

@@ -32,7 +32,7 @@ export const checkTasks = (req, res, next) => {
     if (!Array.isArray(tasks) || tasks.length === 0) {
         return res.status(400).json({
             success: false,
-            message: "Tasks must contain at least one task"
+            message: "Must contain at least one task"
         });
     }
 

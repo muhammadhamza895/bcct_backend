@@ -46,3 +46,25 @@ export const checkDeliveryDate = (req, res, next) => {
     }
     next();
 };
+
+export const checkWorkOrderStatus = (req, res, next) => {
+    const { status } = req.body;
+
+    if (status === undefined) {
+        return res.status(400).json({
+            success: false,
+            message: "Status is required"
+        });
+    }
+
+    const validStatuses = ["pending", "in progress", "completed"];
+    if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+            success: false,
+            message: `Invalid status value`
+        });
+    }
+
+    next();
+};
+
