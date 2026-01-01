@@ -1,3 +1,5 @@
+import { WorkOrderModel } from "../models/workOrder.js";
+
 export const checkJobId = (req, res, next) => {
     const { job_id } = req.body;
 
@@ -58,5 +60,31 @@ export const checkTasks = (req, res, next) => {
     }
 
     next();
+};
+
+export const checkJobHasNoWorkOrders = async (req, res, next) => {
+    try {
+        const { job_id } = req.params;
+
+        const workOrderCount = await WorkOrderModel.countDocuments({
+            job: job_id
+        });
+
+        if (workOrderCount > 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Job cannot be edited or deleted because it has work orders"
+            });
+        }
+        console.log({workOrderCount})
+
+        next();
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to verify job work orders",
+            error: error.message
+        });
+    }
 };
 
