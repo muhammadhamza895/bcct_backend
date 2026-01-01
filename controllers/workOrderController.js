@@ -28,3 +28,28 @@ export const getWorkOrdersByPage = async (req, res) => {
     });
   }
 };
+
+export const createWorkOrder = async (req, res) => {
+  try {
+    const { job, description, priority, deliveryDate } = req.body;
+
+    const workOrder = await WorkOrderModel.create({
+      job,
+      description,
+      priority,
+      deliveryDate
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Work order created successfully",
+      workOrder
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to create work order",
+      error: error.message
+    });
+  }
+};

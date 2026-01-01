@@ -17,7 +17,6 @@ const WorkOrderSchema = new mongoose.Schema(
         },
         deliveryDate: {
             type: Date,
-            required: true
         }
     },
     {
