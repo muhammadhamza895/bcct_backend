@@ -31,7 +31,7 @@ export const getWorkOrdersByPage = async (req, res) => {
 
 export const createWorkOrder = async (req, res) => {
   try {
-    const { job, description, priority,tasks, deliveryDate } = req.body;
+    const { job, description, priority, tasks, deliveryDate } = req.body;
 
     const workOrder = await WorkOrderModel.create({
       job,
@@ -128,5 +128,29 @@ export const editWorkOrder = async (req, res) => {
   }
 };
 
+export const deleteWorkOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const workOrder = await WorkOrderModel.findByIdAndDelete(id);
+
+    if (!workOrder) {
+      return res.status(404).json({
+        success: false,
+        message: "Work order not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Work order deleted successfully"
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete work order",
+      error: error.message
+    });
+  }
+};
 
