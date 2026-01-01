@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { TaskSchema } from "./jobs";
 
 const WorkOrderSchema = new mongoose.Schema(
     {
@@ -9,16 +10,20 @@ const WorkOrderSchema = new mongoose.Schema(
         description: {
             type: String,
             trim: true,
-            default : ""
+            default: ""
         },
         priority: {
             type: String,
             enum: ["low", "medium", "high"],
             required: true
         },
+        tasks: {
+            type: [TaskSchema],
+            required: true
+        },
         deliveryDate: {
             type: Date,
-            default : null
+            default: null
         }
     },
     {
@@ -29,7 +34,7 @@ const WorkOrderSchema = new mongoose.Schema(
 WorkOrderSchema.index({ job: 1 });
 WorkOrderSchema.index({ priority: 1 });
 WorkOrderSchema.index({ createdAt: -1 });
-WorkOrderSchema.index({ job: 1, priority: 1, createdAt: -1});
+WorkOrderSchema.index({ job: 1, priority: 1, createdAt: -1 });
 
 const WorkOrderModel = mongoose.model("WorkOrder", WorkOrderSchema);
-export {WorkOrderModel};
+export { WorkOrderModel };
