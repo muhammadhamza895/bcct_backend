@@ -66,7 +66,7 @@ export const checkJobHasNoWorkOrders = async (req, res, next) => {
     try {
         const { job_id } = req.params;
 
-        const workOrderCount = await WorkOrderModel.countDocuments({
+        const workOrderCount = await WorkOrderModel.exists({
             job: job_id
         });
 
