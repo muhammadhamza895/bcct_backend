@@ -21,6 +21,11 @@ const WorkOrderSchema = new mongoose.Schema(
             type: [TaskSchema],
             required: true
         },
+        status: {
+            type: String,
+            default: 'pending',
+            enum: ["pending", "in progress", "completed"],
+        },
         deliveryDate: {
             type: Date,
             default: null
