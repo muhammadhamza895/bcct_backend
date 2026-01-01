@@ -87,11 +87,10 @@ export const updateWorkOrderStatus = async (req, res) => {
   }
 };
 
-
 export const editWorkOrder = async (req, res) => {
   try {
     const { id } = req.params;
-    const { job, description, priority, deliveryDate, status } = req.body;
+    const { job, description, priority, tasks, deliveryDate } = req.body;
 
     const updatedWorkOrder = await WorkOrderModel.findByIdAndUpdate(
       id,
@@ -100,7 +99,6 @@ export const editWorkOrder = async (req, res) => {
         description,
         priority,
         tasks,
-        status,
         deliveryDate,
       },
       {

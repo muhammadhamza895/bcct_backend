@@ -76,7 +76,7 @@ export const checkJobHasNoWorkOrders = async (req, res, next) => {
                 message: "Job cannot be edited or deleted because it has work orders"
             });
         }
-        console.log({workOrderCount})
+        console.log({ workOrderCount })
 
         next();
     } catch (error) {

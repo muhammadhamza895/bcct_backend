@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import MaterialsModel from "../models/materials.js";
 import { MeasurementModel } from '../models/measurement.js';
 import { JobModel } from '../models/jobs.js';
+import { WorkOrderModel } from '../models/workOrder.js';
 
 const materialVerifier = async (req, res, next) => {
     try {
@@ -42,7 +43,7 @@ const materialVerifier = async (req, res, next) => {
     }
 };
 
-const measureUnitVerifier= async(req, res, next)=>{
+const measureUnitVerifier = async (req, res, next) => {
     try {
         let { measurementId } = req.body;
 
@@ -61,7 +62,7 @@ const measureUnitVerifier= async(req, res, next)=>{
 
         if (!measure) {
             req.measure = {
-                sheetsPerUnit : 1,
+                sheetsPerUnit: 1,
             }
             next()
         }
@@ -97,33 +98,56 @@ const measureUnitVerifier= async(req, res, next)=>{
 // }
 
 const jobVerifier = async (req, res, next) => {
-  try {
-    const { job } = req.body;
+    try {
+        const { job } = req.body;
 
-    if (!job) {
-      return res.status(400).json({
-        success: false,
-        message: "Job field is required"
-      });
+        if (!job) {
+            return res.status(400).json({
+                success: false,
+                message: "Job field is required"
+            });
+        }
+
+        const existingJob = await JobModel.findOne({ job_id: job });
+
+        if (!existingJob) {
+            return res.status(404).json({
+                success: false,
+                message: `Job with job_id "${job}" does not exist`
+            });
+        }
+
+        next();
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to verify job",
+            error: error.message
+        });
     }
-
-    const existingJob = await JobModel.findOne({ job_id: job });
-
-    if (!existingJob) {
-      return res.status(404).json({
-        success: false,
-        message: `Job with job_id "${job}" does not exist`
-      });
-    }
-
-    next();
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to verify job",
-      error: error.message
-    });
-  }
 };
 
-export { materialVerifier, measureUnitVerifier, jobVerifier};
+const workOrderVerifier = async (req, res, next) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid work order ID"
+        });
+    }
+
+    const workOrder = await WorkOrderModel.findById(id);
+
+    if (!workOrder) {
+        return res.status(404).json({
+            success: false,
+            message: "Work order not found"
+        });
+    }
+
+    req.workOrder = workOrder
+    next()
+}
+
+export { materialVerifier, measureUnitVerifier, jobVerifier, workOrderVerifier };
