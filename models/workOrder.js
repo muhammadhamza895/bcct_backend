@@ -30,5 +30,5 @@ WorkOrderSchema.index({ priority: 1 });
 WorkOrderSchema.index({ createdAt: -1 });
 WorkOrderSchema.index({ job: 1, priority: 1, createdAt: -1});
 
-const WorkOrder = mongoose.model("WorkOrder", WorkOrderSchema);
-export default WorkOrder;
+const WorkOrderModel = mongoose.model("WorkOrder", WorkOrderSchema);
+export {WorkOrderModel};
