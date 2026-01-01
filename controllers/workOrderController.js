@@ -53,3 +53,46 @@ export const createWorkOrder = async (req, res) => {
     });
   }
 };
+
+export const updateWorkOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { job, description, priority, deliveryDate, status } = req.body;
+
+    const updatedWorkOrder = await WorkOrderModel.findByIdAndUpdate(
+      id,
+      {
+        job,
+        description,
+        priority,
+        tasks,
+        status,
+        deliveryDate,
+      },
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    if (!updatedWorkOrder) {
+      return res.status(404).json({
+        success: false,
+        message: "Work order not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Work order updated successfully",
+      workOrder: updatedWorkOrder
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update work order",
+      error: error.message
+    });
+  }
+};
+
