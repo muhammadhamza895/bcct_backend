@@ -8,7 +8,8 @@ const WorkOrderSchema = new mongoose.Schema(
         },
         description: {
             type: String,
-            trim: true
+            trim: true,
+            default : ""
         },
         priority: {
             type: String,
@@ -17,6 +18,7 @@ const WorkOrderSchema = new mongoose.Schema(
         },
         deliveryDate: {
             type: Date,
+            default : null
         }
     },
     {

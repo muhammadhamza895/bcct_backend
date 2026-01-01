@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import MaterialsModel from "../models/materials.js";
 import { MeasurementModel } from '../models/measurement.js';
+import { JobModel } from '../models/jobs.js';
 
 const materialVerifier = async (req, res, next) => {
     try {
@@ -95,4 +96,34 @@ const measureUnitVerifier= async(req, res, next)=>{
 //     }
 // }
 
-export { materialVerifier, measureUnitVerifier };
+const jobVerifier = async (req, res, next) => {
+  try {
+    const { job } = req.body;
+
+    if (!job) {
+      return res.status(400).json({
+        success: false,
+        message: "Job field is required"
+      });
+    }
+
+    const existingJob = await JobModel.findOne({ job_id: job });
+
+    if (!existingJob) {
+      return res.status(404).json({
+        success: false,
+        message: `Job with job_id "${job}" does not exist`
+      });
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to verify job",
+      error: error.message
+    });
+  }
+};
+
+export { materialVerifier, measureUnitVerifier, jobVerifier};
