@@ -9,7 +9,9 @@ export const getJobsByPage = async (req, res) => {
         const jobs = await JobModel.find()
             .sort({ createdAt: -1 })
             .skip(skip)
-            .limit(limit);
+            .limit(limit)
+            .populate("numberOfWorkOrders")
+            .exec();
 
         const totalJobs = await JobModel.countDocuments();
 
@@ -98,27 +100,27 @@ export const updateJob = async (req, res) => {
 };
 
 export const deleteJob = async (req, res) => {
-  try {
-    const { job_id } = req.params;
+    try {
+        const { job_id } = req.params;
 
-    const deletedJob = await JobModel.findOneAndDelete({ job_id });
+        const deletedJob = await JobModel.findOneAndDelete({ job_id });
 
-    if (!deletedJob) {
-      return res.status(404).json({
-        success: false,
-        message: "Job not found"
-      });
+        if (!deletedJob) {
+            return res.status(404).json({
+                success: false,
+                message: "Job not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Job deleted successfully"
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to delete job",
+            error: error.message
+        });
     }
-
-    res.status(200).json({
-      success: true,
-      message: "Job deleted successfully"
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete job",
-      error: error.message
-    });
-  }
 };

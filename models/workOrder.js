@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { TaskSchema } from "./jobs";
+import { TaskSchema } from "./jobs.js";
 
 const WorkOrderSchema = new mongoose.Schema(
     {

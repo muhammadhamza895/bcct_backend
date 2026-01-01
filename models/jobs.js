@@ -37,6 +37,16 @@ const JobSchema = new mongoose.Schema(
     }
 );
 
+JobSchema.virtual("numberOfWorkOrders", {
+    ref: "WorkOrder",
+    localField: "job_id",
+    foreignField: "job",
+    count: true
+});
+
+JobSchema.set("toJSON", { virtuals: true });
+JobSchema.set("toObject", { virtuals: true });
+
 JobSchema.index({ job_id: 1 });
 JobSchema.index({ department: 1 });
 JobSchema.index({ createdAt: -1 });
