@@ -47,12 +47,19 @@ const measureUnitVerifier = async (req, res, next) => {
     try {
         let { measurementId } = req.body;
 
-        if (
-            !measurementId ||
-            !mongoose.Types.ObjectId.isValid(measurementId)
-        ) {
-            req.measure = { sheetsPerUnit: 1 };
-            return next();
+        // if (
+        //     !measurementId ||
+        //     !mongoose.Types.ObjectId.isValid(measurementId)
+        // ) {
+        //     req.measure = { sheetsPerUnit: 1 };
+        //     return next();
+        // }
+
+        if (!mongoose.Types.ObjectId.isValid(measurementId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid measurement ID"
+            });
         }
 
         const measure = await MeasurementModel
@@ -60,11 +67,18 @@ const measureUnitVerifier = async (req, res, next) => {
             .select('sheetsPerUnit')
             .lean();
 
+        // if (!measure) {
+        //     req.measure = {
+        //         sheetsPerUnit: 1,
+        //     }
+        //     next()
+        // }
+
         if (!measure) {
-            req.measure = {
-                sheetsPerUnit: 1,
-            }
-            next()
+            return res.status(404).json({
+                success: false,
+                message: "Measurement not found"
+            });
         }
 
         req.measure = measure
