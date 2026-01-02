@@ -14,18 +14,6 @@ const MaterialsSchema = new mongoose.Schema({
         type : Number,
         default : 0
     }
-    // unitQuantity: {
-    //     type: Number,
-    //     required: true,
-    //     default: 0   
-    // },
-
-    // extraSheets: {
-    //     type: Number,
-    //     default: 0   
-    // },
-    // currentStock: { type: Number },
-    // maxStock: { type: Number },
 });
 
 const MaterialsModel = mongoose.model('Material', MaterialsSchema);
