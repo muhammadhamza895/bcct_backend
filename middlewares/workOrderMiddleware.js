@@ -74,7 +74,7 @@ export const checkPendingStatus = async (req, res, next) => {
         if (workOrder?.status !== "pending") {
             return res.status(403).json({
                 success: false,
-                message: "Only pending work orders can be edited"
+                message: "Only pending work orders can be edited or deleted"
             });
         }
 
