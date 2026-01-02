@@ -22,7 +22,7 @@ const materialVerifier = async (req, res, next) => {
             });
         }
 
-        const material = await MaterialsModel.findById(materialId);
+        const material = await MaterialsModel.findById(materialId).populate("measurementId");
 
         if (!material) {
             return res.status(404).json({
