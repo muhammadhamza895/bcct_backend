@@ -88,4 +88,31 @@ const updateMeasurement = async (req, res) => {
     }
 }
 
-export { getMeasurement, createMeasurement, updateMeasurement };
+const deleteMeasurement = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const deletedMeasurement = await MeasurementModel.findByIdAndDelete(id);
+
+        if (!deletedMeasurement) {
+            return res.status(404).json({
+                success: false,
+                message: "Measurement not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Measurement deleted successfully"
+        });
+    } catch (error) {
+        console.error("Error deleting measurement:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error deleting measurement"
+        });
+    }
+};
+
+
+export { getMeasurement, createMeasurement, updateMeasurement, deleteMeasurement };

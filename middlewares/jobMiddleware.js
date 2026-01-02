@@ -66,17 +66,16 @@ export const checkJobHasNoWorkOrders = async (req, res, next) => {
     try {
         const { job_id } = req.params;
 
-        const workOrderCount = await WorkOrderModel.exists({
+        const workOrderExist = await WorkOrderModel.exists({
             job: job_id
         });
 
-        if (workOrderCount > 0) {
+        if (workOrderExist) {
             return res.status(400).json({
                 success: false,
                 message: "Job cannot be edited or deleted because it has work orders"
             });
         }
-        console.log({ workOrderCount })
 
         next();
     } catch (error) {
