@@ -132,6 +132,13 @@ export const deleteWorkOrder = async (req, res) => {
   try {
     const { id } = req.params;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid work order ID"
+      });
+    }
+
     const workOrder = await WorkOrderModel.findByIdAndDelete(id);
 
     if (!workOrder) {
