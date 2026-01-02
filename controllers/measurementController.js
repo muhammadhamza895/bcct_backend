@@ -61,15 +61,15 @@ const updateMeasurement = async (req, res) => {
     try {
         const { id } = req.params;
         const { name, sheetsPerUnit } = req.body;
-        // const parsedSheetsPerUnit = parseInt(sheetsPerUnit);
-        // if (Number.isNaN(parsedSheetsPerUnit) || parsedSheetsPerUnit <= 0) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: 'Invalid sheetsPerUnit value'
-        //     });
-        // }
 
         const updatedMeasurement = await MeasurementModel.findByIdAndUpdate(id, { name, sheetsPerUnit }, { new: true });
+
+        if (!updatedMeasurement) {
+            return res.status(404).json({
+                success: false,
+                message: "Measurement not found"
+            });
+        }
 
         res.status(200).json({
             success: true,
