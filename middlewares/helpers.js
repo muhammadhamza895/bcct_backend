@@ -113,7 +113,8 @@ const calculateTotalSheets = ({ unitQuantity, sheetsPerUnit, extraSheets }) => {
 
 
 const nameChecker = (req, res, next) => {
-    const trimmedName = req?.body?.name?.trim();
+    const { name } = req?.body
+    const trimmedName = name?.trim();
 
     if (!trimmedName) {
         return res.status(400).json({

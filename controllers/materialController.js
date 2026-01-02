@@ -41,13 +41,6 @@ const createMaterial = async (req, res) => {
 
         const trimmedName = name?.trim();
 
-        if (!trimmedName) {
-            return res.status(400).json({
-                success: false,
-                message: 'Name is required'
-            });
-        }
-
         const sheetsPerUnit = req?.measure?.sheetsPerUnit
         const totalSheets = calculateTotalSheets({unitQuantity, sheetsPerUnit, extraSheets})
 
@@ -87,13 +80,6 @@ const updateMaterial = async (req, res) => {
         let { name, measurementId, unitQuantity, extraSheets } = req.body;
 
         const trimmedName = name?.trim();
-
-        if (!trimmedName) {
-            return res.status(400).json({
-                success: false,
-                message: 'Name is required'
-            });
-        }
 
         const sheetsPerUnit = req?.measure?.sheetsPerUnit
         const totalSheets = calculateTotalSheets({unitQuantity, sheetsPerUnit, extraSheets})
