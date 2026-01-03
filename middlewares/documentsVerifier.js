@@ -17,7 +17,7 @@ const materialVerifier = async (req, res, next) => {
             });
         }
 
-        if (!mongoose.Types.ObjectId.isValid(materialId)) {
+        if (!mongoIdVerifier(materialId)) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid materialId'

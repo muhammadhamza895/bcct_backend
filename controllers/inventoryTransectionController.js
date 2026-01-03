@@ -94,4 +94,41 @@ export const revertWorkOrderController = async (req, res) => {
     }
 };
 
+export const getInventoryTransactionsByMaterial = async (req, res) => {
+    try {
+        const { _id : materialId } = req.material
+        const { page } = req.params;
+
+        const pageNumber = Math.max(parseInt(page) || 1, 1);
+        const limit = 10;
+        const skip = (pageNumber - 1) * limit;
+
+        const [transactions, totalCount] = await Promise.all([
+            InventoryTransactionModel.find({ materialId })
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+
+            InventoryTransactionModel.countDocuments({ materialId })
+        ]);
+
+        res.status(200).json({
+            success: true,
+            page: pageNumber,
+            totalPages: Math.ceil(totalCount / limit),
+            totalTransactions: totalCount,
+            transactions
+        });
+    } catch (error) {
+        console.error("Error fetching inventory transactions:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch inventory transactions",
+            error: error.message
+        });
+    }
+};
+
+
 
