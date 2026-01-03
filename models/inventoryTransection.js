@@ -14,7 +14,12 @@ const InventoryTransactionSchema = new mongoose.Schema(
         },
         sourceType: {
             type: String,
-            enum: ["JOB", "ONBOARDING", "ONBOARDING_REVERSAL"],
+            enum: [
+                "WORK_ORDER",
+                "ONBOARDING",
+                "ONBOARDING_REVERSAL",
+                "WORK_ORDER_REVERSAL"
+            ],
             required: true
         },
         sourceId: {
