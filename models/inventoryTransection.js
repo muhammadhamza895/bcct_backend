@@ -63,6 +63,7 @@ const InventoryTransactionSchema = new mongoose.Schema(
 // indexes for performance
 InventoryTransactionSchema.index({ materialId: 1, createdAt: -1 });
 InventoryTransactionSchema.index({ sourceType: 1, sourceId: 1 });
+InventoryTransactionSchema.index({ sourceId: 1 });
 
 const InventoryTransactionModel = mongoose.model(
     "InventoryTransaction",
