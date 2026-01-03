@@ -9,9 +9,9 @@ const workOrderRouter = express.Router();
 
 workOrderRouter.get("/get-work-order/:page", getWorkOrdersByPage)
 workOrderRouter.post("/create-work-order", jobVerifier, checkPriority, checkTasks, createWorkOrder)
-workOrderRouter.put("/update-work-order-status/:id", checkWorkOrderStatus, updateWorkOrderStatus)
+workOrderRouter.put("/update-work-order-status/:id", workOrderVerifier, checkWorkOrderStatus, updateWorkOrderStatus)
 workOrderRouter.put("/edit-work-order/:id", workOrderVerifier, checkPendingStatus, jobVerifier, checkPriority, checkTasks, editWorkOrder)
-workOrderRouter.delete("/delete-work-order/:id", checkPendingStatus, deleteWorkOrder)
+workOrderRouter.delete("/delete-work-order/:id", workOrderVerifier, checkPendingStatus, deleteWorkOrder)
 
 
 

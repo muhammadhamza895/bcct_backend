@@ -1,4 +1,5 @@
 import { WorkOrderModel } from "../models/workOrder.js";
+import { mongoIdVerifier } from "../middlewares/helpers.js"
 
 export const getWorkOrdersByPage = async (req, res) => {
   try {
@@ -57,26 +58,37 @@ export const createWorkOrder = async (req, res) => {
 
 export const updateWorkOrderStatus = async (req, res) => {
   try {
-    const { id } = req.params;
+    // const { id } = req.params;
     const { status } = req.body;
+    const { workOrder } = req
 
-    const updatedWorkOrder = await WorkOrderModel.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
+    // if (!mongoIdVerifier(id)) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'Invalid Id'
+    //   });
+    // }
 
-    if (!updatedWorkOrder) {
-      return res.status(404).json({
-        success: false,
-        message: "Work order not found"
-      });
-    }
+    // const updatedWorkOrder = await WorkOrderModel.findByIdAndUpdate(
+    //   id,
+    //   { status },
+    //   { new: true }
+    // );
+
+    // if (!updatedWorkOrder) {
+    //   return res.status(404).json({
+    //     success: false,
+    //     message: "Work order not found"
+    //   });
+    // }
+    workOrder.status = status
+
+    await workOrder.save();
 
     res.status(200).json({
       success: true,
       message: "Work order status updated successfully",
-      workOrder: updatedWorkOrder
+      workOrder
     });
   } catch (error) {
     res.status(500).json({
@@ -89,35 +101,51 @@ export const updateWorkOrderStatus = async (req, res) => {
 
 export const editWorkOrder = async (req, res) => {
   try {
-    const { id } = req.params;
+    // const { id } = req.params;
     const { job, description, priority, tasks, deliveryDate } = req.body;
+    const { workOrder } = req
 
-    const updatedWorkOrder = await WorkOrderModel.findByIdAndUpdate(
-      id,
-      {
-        job,
-        description,
-        priority,
-        tasks,
-        deliveryDate,
-      },
-      {
-        new: true,
-        runValidators: true
-      }
-    );
+    // if (!mongoIdVerifier(id)) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'Invalid Id'
+    //   });
+    // }
 
-    if (!updatedWorkOrder) {
-      return res.status(404).json({
-        success: false,
-        message: "Work order not found"
-      });
-    }
+    // const updatedWorkOrder = await WorkOrderModel.findByIdAndUpdate(
+    //   id,
+    //   {
+    //     job,
+    //     description,
+    //     priority,
+    //     tasks,
+    //     deliveryDate,
+    //   },
+    //   {
+    //     new: true,
+    //     runValidators: true
+    //   }
+    // );
+
+    // if (!updatedWorkOrder) {
+    //   return res.status(404).json({
+    //     success: false,
+    //     message: "Work order not found"
+    //   });
+    // }
+
+    workOrder.job = job
+    workOrder.description = description
+    workOrder.priority = priority
+    workOrder.tasks = tasks
+    workOrder.deliveryDate = deliveryDate
+
+    await workOrder.save();
 
     res.status(200).json({
       success: true,
       message: "Work order updated successfully",
-      workOrder: updatedWorkOrder
+      workOrder,
     });
   } catch (error) {
     res.status(500).json({
@@ -130,23 +158,25 @@ export const editWorkOrder = async (req, res) => {
 
 export const deleteWorkOrder = async (req, res) => {
   try {
-    const { id } = req.params;
+    // const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid work order ID"
-      });
-    }
+    // if (!mongoose.Types.ObjectId.isValid(id)) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Invalid work order ID"
+    //   });
+    // }
 
-    const workOrder = await WorkOrderModel.findByIdAndDelete(id);
+    // const workOrder = await WorkOrderModel.findByIdAndDelete(id);
 
-    if (!workOrder) {
-      return res.status(404).json({
-        success: false,
-        message: "Work order not found"
-      });
-    }
+    // if (!workOrder) {
+    //   return res.status(404).json({
+    //     success: false,
+    //     message: "Work order not found"
+    //   });
+    // }
+    const { workOrder } = req
+    await workOrder.deleteOne();
 
     res.status(200).json({
       success: true,

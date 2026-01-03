@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { MeasurementModel } from "../models/measurement.js";
 
 const quantityVerification = (req, res, next) => {
@@ -79,6 +80,12 @@ const uniqueMeasurementVerifier = async (req, res, next) => {
 
         const query = { name };
         if (id) {
+            if (!mongoIdVerifier(id)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid Id'
+                });
+            }
             query._id = { $ne: id };
         }
 
@@ -137,4 +144,8 @@ const passChecker = (req, res, next) => {
     next()
 }
 
-export { quantityVerification, sheetsPerUnitVerification, uniqueMeasurementVerifier, sheetToUnitConverter, calculateTotalSheets, nameChecker, passChecker };
+const mongoIdVerifier = (id) => {
+    return mongoose.Types.ObjectId.isValid(id);
+};
+
+export { quantityVerification, sheetsPerUnitVerification, uniqueMeasurementVerifier, sheetToUnitConverter, calculateTotalSheets, nameChecker, passChecker, mongoIdVerifier };

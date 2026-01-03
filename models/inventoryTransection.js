@@ -14,7 +14,12 @@ const InventoryTransactionSchema = new mongoose.Schema(
         },
         sourceType: {
             type: String,
-            enum: ["JOB", "ONBOARDING", "ONBOARDING_REVERSAL"],
+            enum: [
+                "WORK_ORDER",
+                "ONBOARDING",
+                "ONBOARDING_REVERSAL",
+                "WORK_ORDER_REVERSAL"
+            ],
             required: true
         },
         sourceId: {
@@ -58,6 +63,7 @@ const InventoryTransactionSchema = new mongoose.Schema(
 // indexes for performance
 InventoryTransactionSchema.index({ materialId: 1, createdAt: -1 });
 InventoryTransactionSchema.index({ sourceType: 1, sourceId: 1 });
+InventoryTransactionSchema.index({ sourceId: 1 });
 
 const InventoryTransactionModel = mongoose.model(
     "InventoryTransaction",

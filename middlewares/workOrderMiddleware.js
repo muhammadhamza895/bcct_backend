@@ -60,7 +60,9 @@ export const checkWorkOrderStatus = (req, res, next) => {
     if (!validStatuses.includes(status)) {
         return res.status(400).json({
             success: false,
-            message: `Invalid status value`
+            message: `Invalid status value.  Allowed values are: ${validStatuses.join(
+                ", "
+            )}`
         });
     }
 
