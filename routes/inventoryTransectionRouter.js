@@ -7,11 +7,14 @@ import {
     verifySourceId,
     checkNotCompletedWorkOrder,
     verifyMaterialStockForCompletion,
-    prepareInventoryTransactionsForCompletion
+    prepareInventoryTransactionsForCompletion,
+    preventDoubleReversal,
+    loadWorkOrderInventoryTransactions,
+    prepareReversalTransactions
 } from '../middlewares/inventoryTransectionMiddleware.js';
 import { quantityVerification } from '../middlewares/helpers.js';
 
-import { completeWorkOrderInventoryController } from '../controllers/inventoryTransectionController.js'
+import { completeWorkOrderInventoryController, revertWorkOrderController } from '../controllers/inventoryTransectionController.js'
 
 const inventoryTransectionRouter = express.Router();
 
@@ -24,13 +27,11 @@ inventoryTransectionRouter.post('/work-order-complete/:id',
     prepareInventoryTransactionsForCompletion,
     completeWorkOrderInventoryController);
 inventoryTransectionRouter.post('/work-order-revert/:id',
-    inventoryTransectionVerifier,
-    workOrderFromTransactionVerifier,
-    () => { }
-    // workOrderVerifier,
-    // checkNotCompletedWorkOrder,
-    // verifyMaterialStockForCompletion,
-    // prepareInventoryTransactionsForCompletion
+    workOrderVerifier,
+    preventDoubleReversal,
+    loadWorkOrderInventoryTransactions,
+    prepareReversalTransactions,
+    revertWorkOrderController
 );
 
 export { inventoryTransectionRouter };

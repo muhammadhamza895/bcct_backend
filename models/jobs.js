@@ -22,6 +22,7 @@ const JobSchema = new mongoose.Schema(
             type: String,
             required: true,
             unique: true,
+            index: true
         },
         department: {
             type: String,
@@ -47,7 +48,6 @@ JobSchema.virtual("numberOfWorkOrders", {
 JobSchema.set("toJSON", { virtuals: true });
 JobSchema.set("toObject", { virtuals: true });
 
-JobSchema.index({ job_id: 1 });
 JobSchema.index({ department: 1 });
 JobSchema.index({ createdAt: -1 });
 

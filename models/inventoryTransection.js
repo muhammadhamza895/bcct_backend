@@ -65,7 +65,7 @@ InventoryTransactionSchema.index({ materialId: 1 });
 InventoryTransactionSchema.index({ materialId: 1, createdAt: -1 });
 InventoryTransactionSchema.index({ sourceId: 1 });
 InventoryTransactionSchema.index({ sourceType: 1, createdAt: -1 });
-InventoryTransactionSchema.index({ sourceType: 1, sourceId: 1 });
+InventoryTransactionSchema.index({ sourceType: 1, sourceId: 1 , isReversal: 1});
 
 const InventoryTransactionModel = mongoose.model(
     "InventoryTransaction",

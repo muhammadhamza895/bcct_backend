@@ -178,6 +178,27 @@ export const checkNotCompletedWorkOrder = (req, res, next) => {
     }
 };
 
+export const preventDoubleReversal = (req, res, next) => {
+    const status = req.workOrder.status;
+
+    if (status === "reverted") {
+        return res.status(400).json({
+            success: false,
+            message: "This work order has already been reverted"
+        });
+    }
+
+    if (status !== "completed") {
+        return res.status(400).json({
+            success: false,
+            message: "Only completed work orders can be reverted"
+        });
+    }
+
+    next();
+};
+
+
 export const verifyMaterialStockForCompletion = async (req, res, next) => {
     try {
         const materials = req?.body?.materials
@@ -347,25 +368,68 @@ export const prepareInventoryTransactionsForCompletion = (req, res, next) => {
     }
 };
 
+export const loadWorkOrderInventoryTransactions = async (req, res, next) => {
+    try {
+        const transactions = await InventoryTransactionModel.find({
+            sourceType: "WORK_ORDER",
+            sourceId: req.workOrder._id.toString(),
+            isReversal: false
+        });
 
-// export const checkCompletedWorkOrder = (req, res, next) => {
-//     try {
-//         const { workOrder } = req;
+        if (!transactions.length) {
+            return res.status(404).json({
+                success: false,
+                message: "No inventory transactions found for this work order"
+            });
+        }
 
-//         if (workOrder.status !== "completed") {
-//             return res.status(403).json({
-//                 success: false,
-//                 message: "Work order is not completed yet"
-//             });
-//         }
+        req.originalTransactions = transactions;
+        next();
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to load inventory transactions",
+            error: error.message
+        });
+    }
+};
 
-//         next();
-//     } catch (error) {
-//         res.status(500).json({
-//             success: false,
-//             message: "Failed to verify work order status",
-//             error: error.message
-//         });
-//     }
-// };
+export const prepareReversalTransactions = async (req, res, next) => {
+    try {
+        const reversalTransactions = [];
+
+        for (const tx of req.originalTransactions) {
+            const material = await MaterialsModel.findById(tx.materialId);
+
+            const stockBefore = material.totalSheets;
+            const stockAfter = stockBefore + Math.abs(tx.totalSheetsChange);
+
+            reversalTransactions.push({
+                materialId: tx.materialId,
+                type: "IN",
+                sourceType: "WORK_ORDER_REVERSAL",
+                sourceId: tx.sourceId,
+
+                unitQuantity: tx.unitQuantity,
+                extraSheets: tx.extraSheets,
+
+                totalSheetsChange: Math.abs(tx.totalSheetsChange),
+                stockBefore,
+                stockAfter,
+
+                pricePerUnit: null,
+                isReversal: true
+            });
+        }
+
+        req.reversalTransactions = reversalTransactions;
+        next();
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to prepare reversal transactions",
+            error: error.message
+        });
+    }
+};
 

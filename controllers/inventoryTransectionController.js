@@ -54,3 +54,44 @@ export const completeWorkOrderInventoryController = async (req, res) => {
     }
 };
 
+export const revertWorkOrderController = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        await InventoryTransactionModel.insertMany(
+            req.reversalTransactions,
+            { session }
+        );
+
+        for (const tx of req.reversalTransactions) {
+            await MaterialsModel.findByIdAndUpdate(
+                tx.materialId,
+                { $inc: { totalSheets: tx.totalSheetsChange } },
+                { session }
+            );
+        }
+
+        req.workOrder.status = "reverted";
+        await req.workOrder.save({ session });
+
+        await session.commitTransaction();
+
+        res.json({
+            success: true,
+            message: "Work order reverted successfully"
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+        res.status(500).json({
+            success: false,
+            message: "Failed to revert work order",
+            error: error.message
+        });
+    } finally {
+        session.endSession();
+    }
+};
+
+
