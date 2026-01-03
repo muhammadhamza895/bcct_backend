@@ -243,10 +243,15 @@ export const verifyMaterialStockForCompletion = async (req, res, next) => {
                 });
             }
 
+            const normalizedExistingStock = sheetToUnitConverter({
+                sheetsPerUnit, 
+                totalSheets : material.totalSheets
+            })
+
             if (material.totalSheets < totalSheetsRequired) {
                 return res.status(400).json({
                     success: false,
-                    message: `Insufficient stock for material "${material.name}"`
+                    message: `Insufficient stock for material "${material.name}". Its current stock is ${normalizedExistingStock?.unitQuantity} units, ${normalizedExistingStock?.extraSheets} sheets.`
                 });
             }
 
