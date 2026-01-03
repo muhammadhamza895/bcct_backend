@@ -1,4 +1,5 @@
 import { WorkOrderModel } from "../models/workOrder.js";
+import { mongoIdVerifier } from "../middlewares/helpers.js"
 
 export const getWorkOrdersByPage = async (req, res) => {
   try {
@@ -60,6 +61,13 @@ export const updateWorkOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
+    if (!mongoIdVerifier(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Id'
+      });
+    }
+
     const updatedWorkOrder = await WorkOrderModel.findByIdAndUpdate(
       id,
       { status },
@@ -91,6 +99,13 @@ export const editWorkOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const { job, description, priority, tasks, deliveryDate } = req.body;
+
+    if (!mongoIdVerifier(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Id'
+      });
+    }
 
     const updatedWorkOrder = await WorkOrderModel.findByIdAndUpdate(
       id,

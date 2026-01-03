@@ -49,7 +49,7 @@ export const checkTasks = (req, res, next) => {
 
         if (
             task.quantity === undefined ||
-            typeof task.quantity !== "number" ||
+            !Number.isInteger(task.quantity) ||
             task.quantity <= 0
         ) {
             return res.status(400).json({
