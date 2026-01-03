@@ -3,6 +3,7 @@ import express from 'express';
 //Middlewares
 import { quantityVerification, nameChecker } from '../middlewares/helpers.js';
 import { measureUnitVerifier } from '../middlewares/documentsVerifier.js';
+import { checkMaterialHasNoTransactions } from '../middlewares/materialMiddleware.js';
 
 // Controllers
 import { getMaterial, createMaterial, updateMaterial, deleteMaterial } from '../controllers/materialController.js';
@@ -13,6 +14,6 @@ const materialRouter = express.Router();
 materialRouter.get('/get-material', getMaterial);
 materialRouter.post('/create-material', measureUnitVerifier, nameChecker, quantityVerification, createMaterial);
 materialRouter.put('/update-material/:id', measureUnitVerifier, nameChecker, quantityVerification, updateMaterial);
-materialRouter.delete('/delete-material/:id', deleteMaterial);
+materialRouter.delete('/delete-material/:id',checkMaterialHasNoTransactions, deleteMaterial);
 
 export { materialRouter };
