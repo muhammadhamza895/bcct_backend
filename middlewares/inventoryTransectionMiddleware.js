@@ -347,3 +347,25 @@ export const prepareInventoryTransactionsForCompletion = (req, res, next) => {
     }
 };
 
+
+// export const checkCompletedWorkOrder = (req, res, next) => {
+//     try {
+//         const { workOrder } = req;
+
+//         if (workOrder.status !== "completed") {
+//             return res.status(403).json({
+//                 success: false,
+//                 message: "Work order is not completed yet"
+//             });
+//         }
+
+//         next();
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             message: "Failed to verify work order status",
+//             error: error.message
+//         });
+//     }
+// };
+

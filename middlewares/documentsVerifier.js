@@ -3,6 +3,8 @@ import MaterialsModel from "../models/materials.js";
 import { MeasurementModel } from '../models/measurement.js';
 import { JobModel } from '../models/jobs.js';
 import { WorkOrderModel } from '../models/workOrder.js';
+import { InventoryTransactionModel } from '../models/inventoryTransection.js';
+import { mongoIdVerifier } from './helpers.js';
 
 const materialVerifier = async (req, res, next) => {
     try {
@@ -141,27 +143,98 @@ const jobVerifier = async (req, res, next) => {
     }
 };
 
-const workOrderVerifier = async (req, res, next) => {
-    const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({
-            success: false,
-            message: "Invalid work order ID"
-        });
+export const loadWorkOrderById = async (workOrderId) => {
+    if (!mongoIdVerifier(workOrderId)) {
+        const error = new Error("Invalid work order ID");
+        error.statusCode = 400;
+        throw error;
     }
 
-    const workOrder = await WorkOrderModel.findById(id);
+    const workOrder = await WorkOrderModel.findById(workOrderId);
 
     if (!workOrder) {
-        return res.status(404).json({
+        const error = new Error("Work order not found");
+        error.statusCode = 404;
+        throw error;
+    }
+
+    return workOrder;
+};
+
+
+const workOrderVerifier = async (req, res, next) => {
+    // const { id } = req.params;
+
+    // if (!mongoose.Types.ObjectId.isValid(id)) {
+    //     return res.status(400).json({
+    //         success: false,
+    //         message: "Invalid work order ID"
+    //     });
+    // }
+
+    // const workOrder = await WorkOrderModel.findById(id);
+
+    // if (!workOrder) {
+    //     return res.status(404).json({
+    //         success: false,
+    //         message: "Work order not found"
+    //     });
+    // }
+
+    // req.workOrder = workOrder
+    // next()
+
+    try {
+        const { id } = req.params;
+
+        const workOrder = await loadWorkOrderById(id);
+        req.workOrder = workOrder;
+
+        next();
+    } catch (error) {
+        res.status(error.statusCode || 500).json({
             success: false,
-            message: "Work order not found"
+            message: error.message
+        });
+    }
+}
+
+const inventoryTransectionVerifier = async (req, res, next) => {
+    const { id } = req.params;
+
+    if (!mongoIdVerifier(id)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid Transection ID"
         });
     }
 
-    req.workOrder = workOrder
+    const transection = await InventoryTransactionModel.findById(id);
+
+    if (!transection) {
+        return res.status(404).json({
+            success: false,
+            message: "transection not found"
+        });
+    }
+
+    req.transection = transection
     next()
 }
 
-export { materialVerifier, measureUnitVerifier, jobVerifier, workOrderVerifier };
+const workOrderFromTransactionVerifier = async (req, res, next) => {
+    try {
+        const { sourceId } = req.transection;
+        const workOrder = await loadWorkOrderById(sourceId);
+        req.workOrder = workOrder;
+        next();
+    } catch (error) {
+        res.status(error.statusCode || 500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+export { materialVerifier, measureUnitVerifier, jobVerifier, workOrderVerifier, inventoryTransectionVerifier, workOrderFromTransactionVerifier };
