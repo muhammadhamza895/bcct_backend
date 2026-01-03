@@ -1,30 +1,30 @@
 import MaterialsModel from '../models/materials.js';
 import { MeasurementModel } from '../models/measurement.js';
-import { calculateTotalSheets, sheetToUnitConverter } from '../middlewares/helpers.js';
+import { calculateTotalSheets, mongoIdVerifier, sheetToUnitConverter } from '../middlewares/helpers.js';
 
 const getMaterial = async (req, res) => {
     try {
         const materials = await MaterialsModel.find().populate('measurementId');
 
-        const data = materials?.map(val=>{
+        const data = materials?.map(val => {
             const sheetsPerUnit = val?.measurementId?.sheetsPerUnit
             const totalSheets = val?.totalSheets
 
 
-            const unitsSheets = sheetToUnitConverter({sheetsPerUnit, totalSheets})
+            const unitsSheets = sheetToUnitConverter({ sheetsPerUnit, totalSheets })
             return {
-                _id : val?._id,
-                name : val?.name,
-                measurement : val?.measurementId?.name || 'No unit',
-                unitQuantity : unitsSheets?.unitQuantity,
-                extraSheets : unitsSheets?.extraSheets
+                _id: val?._id,
+                name: val?.name,
+                measurement: val?.measurementId?.name || 'No unit',
+                unitQuantity: unitsSheets?.unitQuantity,
+                extraSheets: unitsSheets?.extraSheets
             }
         })
 
         res.status(200).json({
             success: true,
             message: 'Materials fetched successfully',
-            materials : data
+            materials: data
         });
     } catch (error) {
         console.error('Error fetching materials:', error);
@@ -42,7 +42,7 @@ const createMaterial = async (req, res) => {
         const trimmedName = name?.trim();
 
         const sheetsPerUnit = req?.measure?.sheetsPerUnit
-        const totalSheets = calculateTotalSheets({unitQuantity, sheetsPerUnit, extraSheets})
+        const totalSheets = calculateTotalSheets({ unitQuantity, sheetsPerUnit, extraSheets })
 
         const existingMaterial = await MaterialsModel.findOne({ name: trimmedName });
         if (existingMaterial) {
@@ -54,7 +54,7 @@ const createMaterial = async (req, res) => {
 
         const newMaterial = new MaterialsModel({
             name: trimmedName,
-            measurementId : measurementId || null,
+            measurementId: measurementId || null,
             totalSheets
         });
 
@@ -82,7 +82,7 @@ const updateMaterial = async (req, res) => {
         const trimmedName = name?.trim();
 
         const sheetsPerUnit = req?.measure?.sheetsPerUnit
-        const totalSheets = calculateTotalSheets({unitQuantity, sheetsPerUnit, extraSheets})
+        const totalSheets = calculateTotalSheets({ unitQuantity, sheetsPerUnit, extraSheets })
 
         const existingMaterial = await MaterialsModel.findOne({
             name: trimmedName,
@@ -130,6 +130,13 @@ const updateMaterial = async (req, res) => {
 const deleteMaterial = async (req, res) => {
     try {
         const { id } = req.params;
+        if (!mongoIdVerifier(id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid Id'
+            });
+        }
+
         const deleted_material = await MaterialsModel.findByIdAndDelete(id);
         if (!deleted_material) {
             return res.status(404).json({
