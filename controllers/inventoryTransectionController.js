@@ -1,51 +1,56 @@
+import mongoose from "mongoose";
 import { InventoryTransactionModel } from "../models/inventoryTransection.js";
 import MaterialsModel from "../models/materials.js";
 
-export const createInventoryTransaction = async (req, res) => {
+export const completeWorkOrderInventoryController = async (req, res) => {
+    const session = await mongoose.startSession();
+
     try {
-        const {
-            materialId,
-            type,
-            sourceType,
-            sourceId,
-            unitQuantity,
-            extraSheets,
-            pricePerUnit,
-            isReversal
-        } = req.body;
+        const { inventoryTransactions, verifiedMaterials, workOrder } = req;
 
-        const { totalSheetsChange, stockBefore, stockAfter } =
-            req.inventoryMeta;
+        session.startTransaction();
 
-        const transaction = await InventoryTransactionModel.create({
-            materialId,
-            type,
-            sourceType,
-            sourceId,
-            unitQuantity,
-            extraSheets,
-            totalSheetsChange,
-            stockBefore,
-            stockAfter,
-            pricePerUnit: pricePerUnit ?? null,
-            isReversal: isReversal ?? false
-        });
+        await InventoryTransactionModel.insertMany(
+            inventoryTransactions,
+            { session }
+        );
 
-        // update material stock
-        await MaterialsModel.findByIdAndUpdate(materialId, {
-            totalSheets: stockAfter
-        });
+        for (const item of verifiedMaterials) {
+            const { material, totalSheetsRequired } = item;
 
-        res.status(201).json({
+            await MaterialsModel.updateOne(
+                { _id: material._id },
+                {
+                    $inc: {
+                        totalSheets: -totalSheetsRequired
+                    }
+                },
+                { session }
+            );
+        }
+
+        workOrder.status = "completed";
+        await workOrder.save({ session });
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return res.status(200).json({
             success: true,
-            message: "Inventory transaction created",
-            transaction
+            message: "Work order completed and inventory updated successfully"
         });
+
     } catch (error) {
-        res.status(500).json({
+        await session.abortTransaction();
+        session.endSession();
+
+        console.error("Inventory completion error:", error);
+
+        return res.status(500).json({
             success: false,
-            message: "Failed to create inventory transaction",
+            message: "Failed to complete work order inventory transaction",
             error: error.message
         });
     }
 };
+

@@ -331,10 +331,10 @@ export const prepareInventoryTransactionsForCompletion = (req, res, next) => {
 
         req.inventoryTransactions = transactions;
 
-        return res.send({
-            success: true,
-            transactions
-        })
+        // return res.send({
+        //     success: true,
+        //     transactions
+        // })
 
         next();
     } catch (error) {

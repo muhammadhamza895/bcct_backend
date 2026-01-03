@@ -11,7 +11,7 @@ import {
 } from '../middlewares/inventoryTransectionMiddleware.js';
 import { quantityVerification } from '../middlewares/helpers.js';
 
-import { createInventoryTransaction } from '../controllers/inventoryTransectionController.js';
+import { completeWorkOrderInventoryController } from '../controllers/inventoryTransectionController.js'
 
 const inventoryTransectionRouter = express.Router();
 
@@ -21,7 +21,8 @@ inventoryTransectionRouter.post('/work-order-complete/:id',
     workOrderVerifier, // id need to passed in path param.
     checkNotCompletedWorkOrder,
     verifyMaterialStockForCompletion,
-    prepareInventoryTransactionsForCompletion);
+    prepareInventoryTransactionsForCompletion,
+    completeWorkOrderInventoryController);
 inventoryTransectionRouter.post('/work-order-revert/:id',
     inventoryTransectionVerifier,
     workOrderFromTransactionVerifier,
