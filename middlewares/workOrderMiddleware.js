@@ -1,3 +1,6 @@
+import mongoose from "mongoose";
+import { InventoryTransactionModel } from "../models/inventoryTransection.js";
+
 export const checkPriority = (req, res, next) => {
     const { priority } = req.body;
     const validPriorities = ["low", "medium", "high"];
@@ -89,5 +92,39 @@ export const checkPendingStatus = async (req, res, next) => {
         });
     }
 };
+
+export const checkWorkOrderUsedInInventory = async (req, res, next) => {
+    try {
+        const { id } = req.params; 
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid work order ID"
+            });
+        }
+
+        const exists = await InventoryTransactionModel.exists({
+            sourceId: id.toString()
+        });
+
+        if (exists) {
+            return res.status(400).json({
+                success: false,
+                message: "Work order cannot be deleted because it exists in inventory transactions"
+            });
+        }
+
+        next();
+    } catch (error) {
+        console.error("Error checking work order in inventory:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to verify work order usage in inventory",
+            error: error.message
+        });
+    }
+};
+
 
 
