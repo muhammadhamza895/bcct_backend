@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 import { JobModel } from "../models/jobs.js";
 // import { OnboardingModel } from "../models/onboarding.js"; 
-import { InventoryTransactionModel } from "../models/inventoryTransaction.js";
-import { calculateTotalSheets } from "./helpers.js";
+import { InventoryTransactionModel } from "../models/inventoryTransection.js";
+import { calculateTotalSheets, sheetToUnitConverter } from "./helpers.js";
+import MaterialsModel from "../models/materials.js";
+import { MeasurementModel } from "../models/measurement.js";
 
 export const prepareInventoryTransaction = (req, res, next) => {
     try {
@@ -95,7 +97,7 @@ export const verifySourceId = async (req, res, next) => {
                     message: `Job with ID ${sourceId} does not exist`
                 });
             }
-        } 
+        }
         // ONBOARDING transactions
         else if (sourceType === "ONBOARDING") {
             if (!mongoose.Types.ObjectId.isValid(sourceId)) {
@@ -113,7 +115,7 @@ export const verifySourceId = async (req, res, next) => {
                     message: `Onboarding with ID ${sourceId} does not exist`
                 });
             }
-        } 
+        }
         // ONBOARDING_REVERSAL transactions
         else if (sourceType === "ONBOARDING_REVERSAL") {
             if (!mongoose.Types.ObjectId.isValid(sourceId)) {
@@ -136,7 +138,7 @@ export const verifySourceId = async (req, res, next) => {
                     message: `Original onboarding transaction with ID ${sourceId} not found for reversal`
                 });
             }
-        } 
+        }
         // Invalid sourceType
         else {
             return res.status(400).json({
@@ -155,4 +157,188 @@ export const verifySourceId = async (req, res, next) => {
     }
 };
 
+export const checkNotCompletedWorkOrder = (req, res, next) => {
+    try {
+        const { workOrder } = req;
+
+        if (workOrder.status === "completed") {
+            return res.status(403).json({
+                success: false,
+                message: "Work order is already completed"
+            });
+        }
+
+        next();
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to verify work order status",
+            error: error.message
+        });
+    }
+};
+
+export const verifyMaterialStockForCompletion = async (req, res, next) => {
+    try {
+        const materials = req?.body?.materials
+            ? req.body.materials
+            : [];
+
+        if (!Array.isArray(materials) || materials.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Materials are required to complete the order"
+            });
+        }
+
+        const verifiedMaterials = [];
+
+        for (let i = 0; i < materials.length; i++) {
+            const { materialId, unitQuantity = 0, extraSheets = 0 } = materials[i];
+
+            if (!mongoose.Types.ObjectId.isValid(materialId)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid materialId of material ${i + 1}`
+                });
+            }
+
+            if (!Number.isInteger(unitQuantity) || unitQuantity < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid units value of material ${i + 1}`
+                });
+            }
+
+            if (!Number.isInteger(extraSheets) || extraSheets < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid extraSheets value of material ${i + 1}`
+                });
+            }
+
+            const material = await MaterialsModel
+                .findById(materialId)
+                .populate("measurementId", "sheetsPerUnit");
+
+            if (!material) {
+                return res.status(404).json({
+                    success: false,
+                    message: `Material at position ${i + 1} not found`
+                });
+            }
+
+            const sheetsPerUnit = material?.measurementId?.sheetsPerUnit || 1;
+
+            const totalSheetsRequired = calculateTotalSheets({
+                unitQuantity,
+                sheetsPerUnit,
+                extraSheets
+            });
+
+            if (totalSheetsRequired <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid units or extraSheets value of ${material?.name}`
+                });
+            }
+
+            if (material.totalSheets < totalSheetsRequired) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Insufficient stock for material "${material.name}"`
+                });
+            }
+
+            verifiedMaterials.push({
+                material,
+                // unitQuantity,
+                // extraSheets,
+                totalSheetsRequired,
+                // stockBefore: material.totalSheets
+            });
+        }
+
+        req.verifiedMaterials = verifiedMaterials;
+
+        next();
+    } catch (error) {
+        console.error("Error verifying material stock:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error verifying material stock",
+            error: error.message
+        });
+    }
+};
+
+export const prepareInventoryTransactionsForCompletion = (req, res, next) => {
+    try {
+        const { workOrder, verifiedMaterials } = req;
+
+        if (!workOrder || !verifiedMaterials || verifiedMaterials.length === 0) {
+            return res.status(500).json({
+                success: false,
+                message: "Required data missing for inventory transaction creation"
+            });
+        }
+
+        const transactions = verifiedMaterials.map(({ material, totalSheetsRequired }) => {
+            const sheetsPerUnit = material?.measurementId?.sheetsPerUnit
+            const stockBefore = material.totalSheets
+            const stockAfter = stockBefore - totalSheetsRequired
+
+            const normalizedUnits = sheetToUnitConverter({
+                sheetsPerUnit,
+                totalSheets: totalSheetsRequired
+            })
+
+            // const normalizedExistingStock = sheetToUnitConverter({
+            //     sheetsPerUnit, 
+            //     totalSheets : material.totalSheets
+            // })
+
+            // const normalizeRemainingStock = sheetToUnitConverter({
+            //     sheetsPerUnit, 
+            //     totalSheets : remainingStock
+            // })
+
+            return {
+                materialId: material._id,
+                type: "OUT",
+                sourceType: "WORK_ORDER",
+                sourceId: workOrder._id.toString(),
+
+                unitQuantity: normalizedUnits?.unitQuantity,
+                extraSheets: normalizedUnits?.extraSheets,
+
+                totalSheetsChange: -totalSheetsRequired,
+                // stockBefore : `${normalizedExistingStock?.unitQuantity} units, ${normalizedExistingStock?.extraSheets} sheets`,
+                // stockAfter: `${normalizeRemainingStock?.unitQuantity} units, ${normalizeRemainingStock?.extraSheets} sheets`,
+
+                stockBefore,
+                stockAfter,
+
+                pricePerUnit: null,
+                isReversal: false
+            };
+        });
+
+        req.inventoryTransactions = transactions;
+
+        return res.send({
+            success: true,
+            transactions
+        })
+
+        next();
+    } catch (error) {
+        console.error("Error preparing inventory transactions:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to prepare inventory transactions",
+            error: error.message
+        });
+    }
+};
 

@@ -39,11 +39,11 @@ const InventoryTransactionSchema = new mongoose.Schema(
             required: true
         },
         stockBefore: {
-            type: Number,
+            type: String,
             required: true
         },
         stockAfter: {
-            type: Number,
+            type: String,
             required: true
         },
         pricePerUnit: {

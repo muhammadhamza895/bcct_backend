@@ -10,6 +10,7 @@ import { onloadingRouter } from './routes/onloadingRouter.js';
 import { userrouter } from './routes/userRouter.js';
 import { jobRouter } from './routes/jobRouter.js';
 import { workOrderRouter } from './routes/workOrderRouter.js';
+import { inventoryTransectionRouter } from './routes/inventoryTransectionRouter.js';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/onloading', onloadingRouter);
 app.use('/user', userrouter);
 app.use('/job', jobRouter);
 app.use('/work-order', workOrderRouter);
+app.use('/inventory-transection', inventoryTransectionRouter);
 
 const port = process.env.PORT || 8080;
 
