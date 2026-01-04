@@ -535,7 +535,7 @@ export const prepareInventoryTransactionsForOnboarding = (req, res, next) => {
                 extraSheets: 0,
 
                 totalSheetsChange: totalSheetsArrived,
-  
+
                 stockBefore,
                 stockAfter,
 
@@ -556,4 +556,30 @@ export const prepareInventoryTransactionsForOnboarding = (req, res, next) => {
         });
     }
 };
+
+export const prepareOnboardingDocument = (req, res, next) => {
+    try {
+        const { items } = req.body;
+        const supplier = req.body?.supplier || "";
+
+        const onBoaring = {
+            supplier,
+            items,
+        }
+
+        req.onBoaring = onBoaring
+        return res.send({
+            success: true,
+            onBoaring
+        })
+        next()
+    } catch (error) {
+        console.error("Error preparing Onboarding document", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to prepare Onboarding document",
+            error: error.message
+        });
+    }
+}
 
