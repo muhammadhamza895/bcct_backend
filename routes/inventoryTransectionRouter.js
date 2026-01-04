@@ -17,7 +17,12 @@ import {
 } from '../middlewares/inventoryTransectionMiddleware.js';
 import { quantityVerification } from '../middlewares/helpers.js';
 
-import { completeWorkOrderInventoryController, revertWorkOrderController, getInventoryTransactionsByMaterial } from '../controllers/inventoryTransectionController.js'
+import {
+    completeWorkOrderInventoryController,
+    revertWorkOrderController,
+    getInventoryTransactionsByMaterial,
+    completeOnBoardingInventoryController
+} from '../controllers/inventoryTransectionController.js'
 
 const inventoryTransectionRouter = express.Router();
 
@@ -43,7 +48,8 @@ inventoryTransectionRouter.post('/work-order-revert/:id',
 inventoryTransectionRouter.post('/onboarding-complete',
     verifyOnboardingItems,
     prepareInventoryTransactionsForOnboarding,
-    prepareOnboardingDocument
+    prepareOnboardingDocument,
+    completeOnBoardingInventoryController
 );
 
 export { inventoryTransectionRouter };

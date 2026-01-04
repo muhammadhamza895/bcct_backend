@@ -565,13 +565,10 @@ export const prepareOnboardingDocument = (req, res, next) => {
         const onBoaring = {
             supplier,
             items,
+            isReversal : false
         }
 
         req.onBoaring = onBoaring
-        return res.send({
-            success: true,
-            onBoaring
-        })
         next()
     } catch (error) {
         console.error("Error preparing Onboarding document", error);
@@ -581,5 +578,15 @@ export const prepareOnboardingDocument = (req, res, next) => {
             error: error.message
         });
     }
+}
+
+export const addOnboardingIdToTransection = ({ id, inventoryTransactions }) => {
+    const onboardedTransections = inventoryTransactions?.map(val => {
+        return {
+            ...val,
+            ['sourceId']: id,
+        }
+    })
+    return onboardedTransections
 }
 

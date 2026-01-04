@@ -25,8 +25,7 @@ const OnboardingSchema = new mongoose.Schema(
     {
         supplier: {
             type: String,
-            required: true,
-            trim: true
+            default : ""
         },
         items: {
             type: [OnboardingItemSchema],

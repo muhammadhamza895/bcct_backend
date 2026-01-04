@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { InventoryTransactionModel } from "../models/inventoryTransection.js";
 import MaterialsModel from "../models/materials.js";
+import { OnboardingModel } from "../models/onboarding.js";
+import { addOnboardingIdToTransection } from "../middlewares/inventoryTransectionMiddleware.js";
 
 export const completeWorkOrderInventoryController = async (req, res) => {
     const session = await mongoose.startSession();
@@ -96,7 +98,7 @@ export const revertWorkOrderController = async (req, res) => {
 
 export const getInventoryTransactionsByMaterial = async (req, res) => {
     try {
-        const { _id : materialId } = req.material
+        const { _id: materialId } = req.material
         const { page } = req.params;
 
         const pageNumber = Math.max(parseInt(page) || 1, 1);
@@ -130,5 +132,60 @@ export const getInventoryTransactionsByMaterial = async (req, res) => {
     }
 };
 
+export const completeOnBoardingInventoryController = async (req, res) => {
+    const { inventoryTransactions, verifiedMaterials } = req;
+    
+    const { onBoaring } = req
 
+    const session = await mongoose.startSession();
+
+    try {
+        session.startTransaction();
+
+        const newOnboaring = new OnboardingModel(onBoaring);
+        await newOnboaring.save({ session })
+
+        const onboaredTransection = addOnboardingIdToTransection({ id: newOnboaring._id, inventoryTransactions })
+
+        await InventoryTransactionModel.insertMany(
+            onboaredTransection,
+            { session }
+        );
+
+        for (const item of verifiedMaterials) {
+            const { material, totalSheetsArrived } = item;
+
+            await MaterialsModel.updateOne(
+                { _id: material._id },
+                {
+                    $inc: {
+                        totalSheets: +totalSheetsArrived
+                    }
+                },
+                { session }
+            );
+        }
+
+        await session.commitTransaction();
+        return res.status(200).json({
+            success: true,
+            message: "Onboarding completed and inventory updated successfully",
+            newOnboaring
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+
+        console.error("Inventory completion error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to complete onboaring inventory transaction",
+            error: error.message
+        });
+    } finally {
+        session.endSession();
+    }
+};
 
