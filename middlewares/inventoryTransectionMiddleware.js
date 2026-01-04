@@ -484,13 +484,13 @@ export const verifyOnboardingItems = async (req, res, next) => {
             const sheetsPerUnit =
                 material?.measurementId?.sheetsPerUnit || 1;
 
-            const totalSheetsRequired = calculateTotalSheets({
+            const totalSheetsArrived = calculateTotalSheets({
                 unitQuantity,
                 sheetsPerUnit,
                 extraSheets: 0
             });
 
-            if (totalSheetsRequired <= 0) {
+            if (totalSheetsArrived <= 0) {
                 return res.status(400).json({
                     success: false,
                     message: `Invalid sheet calculation for material ${itemIndex}`
@@ -499,7 +499,8 @@ export const verifyOnboardingItems = async (req, res, next) => {
 
             verifiedMaterials.push({
                 material,
-                totalSheetsRequired,
+                unitQuantity,
+                totalSheetsArrived,
                 pricePerUnit
             });
         }
@@ -511,6 +512,46 @@ export const verifyOnboardingItems = async (req, res, next) => {
         res.status(500).json({
             success: false,
             message: "Failed to verify onboarding items",
+            error: error.message
+        });
+    }
+};
+
+export const prepareInventoryTransactionsForOnboarding = (req, res, next) => {
+    try {
+        const { verifiedMaterials } = req;
+
+        const transactions = verifiedMaterials.map(({ material, unitQuantity, totalSheetsArrived, pricePerUnit }) => {
+            const stockBefore = material.totalSheets
+            const stockAfter = stockBefore + totalSheetsArrived
+
+            return {
+                materialId: material._id,
+                type: "IN",
+                sourceType: "ONBOARDING",
+                sourceId: "",
+
+                unitQuantity: unitQuantity,
+                extraSheets: 0,
+
+                totalSheetsChange: totalSheetsArrived,
+  
+                stockBefore,
+                stockAfter,
+
+                pricePerUnit: pricePerUnit,
+                isReversal: false
+            };
+        });
+
+        req.inventoryTransactions = transactions;
+
+        next();
+    } catch (error) {
+        console.error("Error preparing inventory transactions:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to prepare inventory transactions",
             error: error.message
         });
     }

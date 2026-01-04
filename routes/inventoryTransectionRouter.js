@@ -11,7 +11,8 @@ import {
     preventDoubleReversal,
     loadWorkOrderInventoryTransactions,
     prepareReversalTransactions,
-    verifyOnboardingItems
+    verifyOnboardingItems,
+    prepareInventoryTransactionsForOnboarding
 } from '../middlewares/inventoryTransectionMiddleware.js';
 import { quantityVerification } from '../middlewares/helpers.js';
 
@@ -39,7 +40,8 @@ inventoryTransectionRouter.post('/work-order-revert/:id',
 );
 
 inventoryTransectionRouter.post('/onboarding-complete',
-    verifyOnboardingItems
+    verifyOnboardingItems,
+    prepareInventoryTransactionsForOnboarding
 );
 
 export { inventoryTransectionRouter };
