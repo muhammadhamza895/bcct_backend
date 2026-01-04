@@ -5,6 +5,7 @@ import { InventoryTransactionModel } from "../models/inventoryTransection.js";
 import { calculateTotalSheets, sheetToUnitConverter } from "./helpers.js";
 import MaterialsModel from "../models/materials.js";
 import { MeasurementModel } from "../models/measurement.js";
+import { WorkOrderModel } from "../models/workOrder.js";
 
 export const prepareInventoryTransaction = (req, res, next) => {
     try {
@@ -433,6 +434,22 @@ export const prepareReversalTransactions = async (req, res, next) => {
         });
     }
 };
+
+export const createNewWorkOrderDocument = (req, res, next) => {
+    const workOrder = req.workOrder;
+
+    const newWorkOrderData = {
+        job: workOrder.job,
+        description: workOrder?.description || "",
+        priority: workOrder.priority,
+        tasks: workOrder.tasks,
+        deliveryDate: workOrder.deliveryDate
+    }
+
+    const newWorkOrder = new WorkOrderModel(newWorkOrderData)
+    req.newWorkOrder = newWorkOrder
+    next()
+}
 
 export const verifyOnboardingItems = async (req, res, next) => {
     try {

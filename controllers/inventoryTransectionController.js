@@ -77,6 +77,9 @@ export const revertWorkOrderController = async (req, res) => {
         req.workOrder.status = "reverted";
         await req.workOrder.save({ session });
 
+        const { newWorkOrder } = req
+        await newWorkOrder.save({session})
+
         await session.commitTransaction();
 
         res.json({
@@ -135,7 +138,7 @@ export const getInventoryTransactionsByMaterial = async (req, res) => {
 
 export const completeOnBoardingInventoryController = async (req, res) => {
     const { inventoryTransactions, verifiedMaterials } = req;
-    
+
     const { onBoaring } = req
 
     const session = await mongoose.startSession();
