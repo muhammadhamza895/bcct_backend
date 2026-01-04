@@ -198,7 +198,6 @@ export const preventDoubleReversal = (req, res, next) => {
     next();
 };
 
-
 export const verifyMaterialStockForCompletion = async (req, res, next) => {
     try {
         const materials = req?.body?.materials
@@ -265,8 +264,8 @@ export const verifyMaterialStockForCompletion = async (req, res, next) => {
             }
 
             const normalizedExistingStock = sheetToUnitConverter({
-                sheetsPerUnit, 
-                totalSheets : material.totalSheets
+                sheetsPerUnit,
+                totalSheets: material.totalSheets
             })
 
             if (material.totalSheets < totalSheetsRequired) {
@@ -428,6 +427,90 @@ export const prepareReversalTransactions = async (req, res, next) => {
         res.status(500).json({
             success: false,
             message: "Failed to prepare reversal transactions",
+            error: error.message
+        });
+    }
+};
+
+export const verifyOnboardingItems = async (req, res, next) => {
+    try {
+        const items = req.body?.items || [];
+
+        if (!Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Items must be a non-empty array"
+            });
+        }
+
+        const verifiedMaterials = [];
+
+        for (let i = 0; i < items.length; i++) {
+            const itemIndex = i + 1;
+            const { materialId, unitQuantity, pricePerUnit } = items[i];
+
+            if (!mongoose.Types.ObjectId.isValid(materialId)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid materialId for material ${itemIndex}`
+                });
+            }
+
+            if (!Number.isInteger(unitQuantity) || unitQuantity <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid unit quantity for material ${itemIndex}`
+                });
+            }
+
+            if (typeof pricePerUnit !== "number" || pricePerUnit < 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid price per unit for material ${itemIndex}`
+                });
+            }
+
+            const material = await MaterialsModel
+                .findById(materialId)
+                .populate("measurementId", "sheetsPerUnit");
+
+            if (!material) {
+                return res.status(404).json({
+                    success: false,
+                    message: `Material not found at position ${itemIndex}`
+                });
+            }
+
+            const sheetsPerUnit =
+                material?.measurementId?.sheetsPerUnit || 1;
+
+            const totalSheetsRequired = calculateTotalSheets({
+                unitQuantity,
+                sheetsPerUnit,
+                extraSheets: 0
+            });
+
+            if (totalSheetsRequired <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Invalid sheet calculation for material ${itemIndex}`
+                });
+            }
+
+            verifiedMaterials.push({
+                material,
+                totalSheetsRequired,
+                pricePerUnit
+            });
+        }
+
+        req.verifiedMaterials = verifiedMaterials;
+        next();
+    } catch (error) {
+        console.error("Error verifying onboarding items:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to verify onboarding items",
             error: error.message
         });
     }
