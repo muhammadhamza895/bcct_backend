@@ -23,8 +23,13 @@ const InventoryTransactionSchema = new mongoose.Schema(
             required: true
         },
         sourceId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            refPath: "sourceModel"
+        }, sourceModel: {
             type: String,
-            required: true
+            required: true,
+            enum: ["WorkOrder", "Onboarding"]
         },
         unitQuantity: {
             type: Number,
@@ -65,7 +70,7 @@ InventoryTransactionSchema.index({ materialId: 1 });
 InventoryTransactionSchema.index({ materialId: 1, createdAt: -1 });
 InventoryTransactionSchema.index({ sourceId: 1 });
 InventoryTransactionSchema.index({ sourceType: 1, createdAt: -1 });
-InventoryTransactionSchema.index({ sourceType: 1, sourceId: 1 , isReversal: 1});
+InventoryTransactionSchema.index({ sourceType: 1, sourceId: 1, isReversal: 1 });
 
 const InventoryTransactionModel = mongoose.model(
     "InventoryTransaction",

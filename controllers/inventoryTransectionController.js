@@ -110,7 +110,8 @@ export const getInventoryTransactionsByMaterial = async (req, res) => {
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
-                .lean(),
+                .lean()
+                .populate("sourceId"),
 
             InventoryTransactionModel.countDocuments({ materialId })
         ]);

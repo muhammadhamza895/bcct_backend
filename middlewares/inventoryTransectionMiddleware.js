@@ -333,6 +333,7 @@ export const prepareInventoryTransactionsForCompletion = (req, res, next) => {
                 type: "OUT",
                 sourceType: "WORK_ORDER",
                 sourceId: workOrder._id.toString(),
+                sourceModel : "WorkOrder",
 
                 unitQuantity: normalizedUnits?.unitQuantity,
                 extraSheets: normalizedUnits?.extraSheets,
@@ -408,6 +409,7 @@ export const prepareReversalTransactions = async (req, res, next) => {
                 type: "IN",
                 sourceType: "WORK_ORDER_REVERSAL",
                 sourceId: tx.sourceId,
+                sourceModel : "WorkOrder",
 
                 unitQuantity: tx.unitQuantity,
                 extraSheets: tx.extraSheets,
@@ -530,6 +532,7 @@ export const prepareInventoryTransactionsForOnboarding = (req, res, next) => {
                 type: "IN",
                 sourceType: "ONBOARDING",
                 sourceId: "",
+                sourceModel : "Onboarding",
 
                 unitQuantity: unitQuantity,
                 extraSheets: 0,
