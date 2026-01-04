@@ -190,3 +190,45 @@ export const completeOnBoardingInventoryController = async (req, res) => {
     }
 };
 
+export const revertOnboaringController = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        await InventoryTransactionModel.insertMany(
+            req.reversalTransactions,
+            { session }
+        );
+
+        for (const tx of req.reversalTransactions) {
+            await MaterialsModel.findByIdAndUpdate(
+                tx.materialId,
+                { $inc: { totalSheets: -tx.totalSheetsChange } },
+                { session }
+            );
+        }
+
+        req.onboaring.isReversal = true;
+        await req.onboaring.save({ session });
+
+        await session.commitTransaction();
+
+        res.json({
+            success: true,
+            message: "Onboarding reverted successfully"
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+        res.status(500).json({
+            success: false,
+            message: "Failed to revert onboarding",
+            error: error.message
+        });
+    } finally {
+        session.endSession();
+    }
+};
+
+
+

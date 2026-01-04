@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { inventoryTransectionVerifier, materialVerifier, workOrderVerifier, workOrderFromTransactionVerifier } from '../middlewares/documentsVerifier.js';
+import { inventoryTransectionVerifier, materialVerifier, workOrderVerifier, onboaringVerifier } from '../middlewares/documentsVerifier.js';
 import {
     prepareInventoryTransaction,
     verifyOnboardingPrice,
@@ -13,7 +13,10 @@ import {
     prepareReversalTransactions,
     verifyOnboardingItems,
     prepareInventoryTransactionsForOnboarding,
-    prepareOnboardingDocument
+    prepareOnboardingDocument,
+    preventDoubleOnboardingReversal,
+    loadOnboaringInventoryTransactions,
+    prepareOnboardingReversalTransactions
 } from '../middlewares/inventoryTransectionMiddleware.js';
 import { quantityVerification } from '../middlewares/helpers.js';
 
@@ -21,7 +24,8 @@ import {
     completeWorkOrderInventoryController,
     revertWorkOrderController,
     getInventoryTransactionsByMaterial,
-    completeOnBoardingInventoryController
+    completeOnBoardingInventoryController,
+    revertOnboaringController
 } from '../controllers/inventoryTransectionController.js'
 
 const inventoryTransectionRouter = express.Router();
@@ -50,6 +54,14 @@ inventoryTransectionRouter.post('/onboarding-complete',
     prepareInventoryTransactionsForOnboarding,
     prepareOnboardingDocument,
     completeOnBoardingInventoryController
+);
+
+inventoryTransectionRouter.post('/onboarding-revert/:id',
+    onboaringVerifier,
+    preventDoubleOnboardingReversal,
+    loadOnboaringInventoryTransactions,
+    prepareOnboardingReversalTransactions,
+    revertOnboaringController
 );
 
 export { inventoryTransectionRouter };

@@ -5,6 +5,7 @@ import { JobModel } from '../models/jobs.js';
 import { WorkOrderModel } from '../models/workOrder.js';
 import { InventoryTransactionModel } from '../models/inventoryTransection.js';
 import { mongoIdVerifier } from './helpers.js';
+import { OnboardingModel } from '../models/onboarding.js';
 
 const materialVerifier = async (req, res, next) => {
     try {
@@ -143,7 +144,7 @@ const jobVerifier = async (req, res, next) => {
     }
 };
 
-export const loadWorkOrderById = async (workOrderId) => {
+const loadWorkOrderById = async (workOrderId) => {
     if (!mongoIdVerifier(workOrderId)) {
         const error = new Error("Invalid work order ID");
         error.statusCode = 400;
@@ -160,7 +161,6 @@ export const loadWorkOrderById = async (workOrderId) => {
 
     return workOrder;
 };
-
 
 const workOrderVerifier = async (req, res, next) => {
     // const { id } = req.params;
@@ -235,6 +235,41 @@ const workOrderFromTransactionVerifier = async (req, res, next) => {
         });
     }
 };
+
+export const loadOnBoardingById = async (onboaringId) => {
+    if (!mongoIdVerifier(onboaringId)) {
+        const error = new Error("Invalid onboaring ID");
+        error.statusCode = 400;
+        throw error;
+    }
+
+    const onboaring = await OnboardingModel.findById(onboaringId);
+
+    if (!onboaring) {
+        const error = new Error("Onboarding not found");
+        error.statusCode = 404;
+        throw error;
+    }
+
+    return onboaring;
+};
+
+
+export const onboaringVerifier = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const onboaring = await loadOnBoardingById(id);
+        req.onboaring = onboaring;
+
+        next();
+    } catch (error) {
+        res.status(error.statusCode || 500).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
 
 
 export { materialVerifier, measureUnitVerifier, jobVerifier, workOrderVerifier, inventoryTransectionVerifier, workOrderFromTransactionVerifier };

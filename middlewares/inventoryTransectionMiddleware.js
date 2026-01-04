@@ -333,7 +333,7 @@ export const prepareInventoryTransactionsForCompletion = (req, res, next) => {
                 type: "OUT",
                 sourceType: "WORK_ORDER",
                 sourceId: workOrder._id.toString(),
-                sourceModel : "WorkOrder",
+                sourceModel: "WorkOrder",
 
                 unitQuantity: normalizedUnits?.unitQuantity,
                 extraSheets: normalizedUnits?.extraSheets,
@@ -409,7 +409,7 @@ export const prepareReversalTransactions = async (req, res, next) => {
                 type: "IN",
                 sourceType: "WORK_ORDER_REVERSAL",
                 sourceId: tx.sourceId,
-                sourceModel : "WorkOrder",
+                sourceModel: "WorkOrder",
 
                 unitQuantity: tx.unitQuantity,
                 extraSheets: tx.extraSheets,
@@ -532,7 +532,7 @@ export const prepareInventoryTransactionsForOnboarding = (req, res, next) => {
                 type: "IN",
                 sourceType: "ONBOARDING",
                 sourceId: "",
-                sourceModel : "Onboarding",
+                sourceModel: "Onboarding",
 
                 unitQuantity: unitQuantity,
                 extraSheets: 0,
@@ -568,7 +568,7 @@ export const prepareOnboardingDocument = (req, res, next) => {
         const onBoaring = {
             supplier,
             items,
-            isReversal : false
+            isReversal: false
         }
 
         req.onBoaring = onBoaring
@@ -593,3 +593,83 @@ export const addOnboardingIdToTransection = ({ id, inventoryTransactions }) => {
     return onboardedTransections
 }
 
+export const preventDoubleOnboardingReversal = (req, res, next) => {
+    const isReversal = req.onboaring.isReversal;
+
+    if (isReversal) {
+        return res.status(400).json({
+            success: false,
+            message: "This onboarding has already been reverted"
+        });
+    }
+
+    next();
+};
+
+export const loadOnboaringInventoryTransactions = async (req, res, next) => {
+    try {
+        const transactions = await InventoryTransactionModel.find({
+            sourceType: "ONBOARDING",
+            sourceId: req.onboaring._id,
+            isReversal: false
+        });
+
+        if (!transactions.length) {
+            return res.status(404).json({
+                success: false,
+                message: "No inventory transactions found for this onboarding"
+            });
+        }
+
+        req.originalTransactions = transactions;
+
+        next();
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to load inventory transactions",
+            error: error.message
+        });
+    }
+};
+
+export const prepareOnboardingReversalTransactions = async (req, res, next) => {
+    try {
+        const reversalTransactions = [];
+
+        for (const tx of req.originalTransactions) {
+            const material = await MaterialsModel.findById(tx.materialId);
+
+            const stockBefore = material.totalSheets;
+            const stockAfter = stockBefore - Math.abs(tx.totalSheetsChange);
+
+            reversalTransactions.push({
+                materialId: tx.materialId,
+                type: "OUT",
+                sourceType: "ONBOARDING_REVERSAL",
+                sourceId: tx.sourceId,
+                sourceModel: "Onboarding",
+
+                unitQuantity: tx.unitQuantity,
+                extraSheets: tx.extraSheets,
+
+                totalSheetsChange: -tx.totalSheetsChange,
+                stockBefore,
+                stockAfter,
+
+                pricePerUnit: tx.pricePerUnit,
+                isReversal: true
+            });
+        }
+
+        req.reversalTransactions = reversalTransactions;
+
+        next();
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to prepare reversal transactions",
+            error: error.message
+        });
+    }
+};
