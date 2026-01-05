@@ -309,6 +309,8 @@ export const prepareInventoryTransactionsForCompletion = (req, res, next) => {
             });
         }
 
+        const materialsUsed = []
+
         const transactions = verifiedMaterials.map(({ material, totalSheetsRequired }) => {
             const sheetsPerUnit = material?.measurementId?.sheetsPerUnit
             const stockBefore = material.totalSheets
@@ -317,6 +319,12 @@ export const prepareInventoryTransactionsForCompletion = (req, res, next) => {
             const normalizedUnits = sheetToUnitConverter({
                 sheetsPerUnit,
                 totalSheets: totalSheetsRequired
+            })
+
+            materialsUsed.push({
+                materialId : material?._id,
+                materialName : material?.name,
+                quantity : totalSheetsRequired
             })
 
             // const normalizedExistingStock = sheetToUnitConverter({
@@ -352,10 +360,11 @@ export const prepareInventoryTransactionsForCompletion = (req, res, next) => {
         });
 
         req.inventoryTransactions = transactions;
+        req.materialsUsed = materialsUsed;
 
         // return res.send({
         //     success: true,
-        //     transactions
+        //     materialsUsed
         // })
 
         next();

@@ -1,6 +1,20 @@
 import mongoose from "mongoose";
 import { TaskSchema } from "./jobs.js";
 
+const MaterialsUsedSchema = new mongoose.Schema({
+    materialId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Material'
+    },
+    materialName: {
+        type: String
+    },
+    quantity: {
+        type: Number,
+        min : 0
+    }
+})
+
 const WorkOrderSchema = new mongoose.Schema(
     {
         job: {
@@ -29,6 +43,10 @@ const WorkOrderSchema = new mongoose.Schema(
         deliveryDate: {
             type: Date,
             default: null
+        },
+        materialsUsed: {
+            type: [MaterialsUsedSchema],
+            default: []
         }
     },
     {

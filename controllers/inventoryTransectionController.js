@@ -8,7 +8,7 @@ export const completeWorkOrderInventoryController = async (req, res) => {
     const session = await mongoose.startSession();
 
     try {
-        const { inventoryTransactions, verifiedMaterials, workOrder } = req;
+        const { inventoryTransactions, verifiedMaterials, workOrder, materialsUsed } = req;
 
         session.startTransaction();
 
@@ -32,6 +32,7 @@ export const completeWorkOrderInventoryController = async (req, res) => {
         }
 
         workOrder.status = "completed";
+        workOrder.materialsUsed = materialsUsed
         await workOrder.save({ session });
 
         await session.commitTransaction();
