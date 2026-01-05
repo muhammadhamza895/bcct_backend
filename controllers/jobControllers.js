@@ -31,6 +31,41 @@ export const getJobsByPage = async (req, res) => {
     }
 };
 
+export const getJobsById = async (req, res) => {
+    try {
+        const id = req.params.id;
+        if (!id) {
+            return res.status(400).send({
+                success: false,
+                message: 'Invalid job Id'
+            })
+        }
+
+        const job = await JobModel.findOne({
+            job_id: id
+        }).populate("numberOfWorkOrders")
+            .exec();
+
+        if (!job) {
+            return res.status(404).send({
+                success: false,
+                message: 'Job not found'
+            })
+        }
+
+        res.status(200).json({
+            success: true,
+            job
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch jobs",
+            error: error.message
+        });
+    }
+}
+
 export const createJob = async (req, res) => {
     try {
         const { job_id, department, tasks } = req.body;
