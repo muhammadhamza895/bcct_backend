@@ -14,18 +14,18 @@ const login = async (req, res) => {
         const { name, password } = req.body;
         const Registeruser = await userModel.findOne({ name });
         if (!Registeruser) {
-            return res.json({ message: "User not found", success: false });
+            return res.status(404).json({ message: "User not found", success: false });
         }
         const isMatch = await bcrypt.compare(password, Registeruser.password);
         if (isMatch) {
             const token = createtoken(Registeruser._id);
-            return res.json({ token, user: { name: Registeruser?.name, userType: Registeruser?.userType }, success: true });
+            return res.status(200).json({ token, user: { name: Registeruser?.name, userType: Registeruser?.userType }, success: true, message: "logged in successfully" });
         } else {
-            return res.json({ message: "Invalid password", success: false });
+            return res.status(400).json({ message: "Invalid password", success: false });
         }
     } catch (error) {
         console.error(error);
-        res.json({ message: "Server error", success: false });
+        res.status(400).json({ message: "Server error", success: false });
     }
 };
 
@@ -35,17 +35,17 @@ const register = async (req, res) => {
  
     const Registeruser = await userModel.findOne({ name });
     if (Registeruser) {
-      return res.json({ message: "Name already registered", success: false });
+      return res.status(400).json({ message: "Name already registered", success: false });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new userModel({ name, password: hashedPassword, userType });
     await newUser.save();
     const token = createtoken(newUser._id);
 
-    return res.json({ token, user: { name: newUser.name, email: newUser.email, isAdmin: newUser.isAdmin }, success: true });
+    return res.status(200).json({ token, user: { name: newUser.name, email: newUser.email, isAdmin: newUser.isAdmin }, success: true });
   } catch (error) {
     console.error(error);
-    return res.json({ message: "Server error", success: false });
+    return res.status(400).json({ message: "Server error", success: false });
   }
 };
 export { login, register }
