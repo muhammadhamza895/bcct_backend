@@ -7,8 +7,8 @@ export const getWorkOrdersByPage = async (req, res) => {
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    const workOrders = await WorkOrderModel.find()
-      .sort({ createdAt: -1 }) // latest first
+    const workOrders = await WorkOrderModel.find({ status: { $ne: 'reverted' } })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 

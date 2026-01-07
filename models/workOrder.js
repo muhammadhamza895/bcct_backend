@@ -60,7 +60,10 @@ const WorkOrderSchema = new mongoose.Schema(
 WorkOrderSchema.index({ job: 1 });
 WorkOrderSchema.index({ priority: 1 });
 WorkOrderSchema.index({ status: 1 });
-WorkOrderSchema.index({ createdAt: -1 });
+WorkOrderSchema.index(
+    { createdAt: -1 },
+    { partialFilterExpression: { status: { $ne: 'reverted' } } }
+);
 WorkOrderSchema.index({ job: 1, priority: 1, createdAt: -1 });
 
 const WorkOrderModel = mongoose.model("WorkOrder", WorkOrderSchema);
