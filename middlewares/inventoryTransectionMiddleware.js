@@ -679,7 +679,7 @@ export const prepareOnboardingReversalTransactions = async (req, res, next) => {
                 unitQuantity: tx.unitQuantity,
                 extraSheets: tx.extraSheets,
 
-                totalSheetsChange: -tx.totalSheetsChange,
+                totalSheetsChange: tx.totalSheetsChange,
                 stockBefore,
                 stockAfter,
 
