@@ -79,7 +79,7 @@ export const revertWorkOrderController = async (req, res) => {
         await req.workOrder.save({ session });
 
         const { newWorkOrder } = req
-        await newWorkOrder.save({session})
+        await newWorkOrder.save({ session })
 
         await session.commitTransaction();
 
@@ -115,7 +115,13 @@ export const getInventoryTransactionsByMaterial = async (req, res) => {
                 .skip(skip)
                 .limit(limit)
                 .lean()
-                .populate("sourceId"),
+                .populate("sourceId")
+                .populate({
+                    path: "materialId",
+                    populate: {
+                        path: "measurementId",
+                    },
+                }),
 
             InventoryTransactionModel.countDocuments({ materialId })
         ]);
