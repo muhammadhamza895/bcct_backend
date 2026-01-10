@@ -33,7 +33,7 @@ const inventoryTransectionRouter = express.Router();
 
 // Routes
 // inventoryTransectionRouter.post('/create-inventory-transection', materialVerifier, quantityVerification, verifyOnboardingPrice, prepareInventoryTransaction, verifySourceId, createInventoryTransaction);
-inventoryTransectionRouter.get('/get-inventory-transections/:page', materialVerifier, getInventoryTransactionsByMaterial);
+inventoryTransectionRouter.post('/get-inventory-transections/:page', materialVerifier, getInventoryTransactionsByMaterial);
 
 inventoryTransectionRouter.post('/work-order-complete/:id',
     workOrderVerifier, // id need to passed in path param.
