@@ -151,7 +151,9 @@ export const getOnboarding = async (req, res) => {
         const limit = 10;
         const skip = (pageNumber - 1) * limit;
 
-        const onboardings = await OnboardingModel.find()
+        const onboardings = await OnboardingModel.find({
+            isReversal: { $ne: true }
+        })
             .populate({
                 path: 'items.materialId',
                 model: 'Material',
