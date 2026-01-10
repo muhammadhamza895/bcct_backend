@@ -143,6 +143,42 @@ export const getInventoryTransactionsByMaterial = async (req, res) => {
     }
 };
 
+export const getOnboarding = async (req, res) => {
+    try {
+        const { page } = req.params;
+
+        const pageNumber = Math.max(parseInt(page) || 1, 1);
+        const limit = 10;
+        const skip = (pageNumber - 1) * limit;
+
+        const onboardings = await OnboardingModel.find()
+            .populate({
+                path: 'items.materialId',
+                model: 'Material',
+            })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+
+        const totalOnboardings = await OnboardingModel.countDocuments()
+
+        res.status(200).json({
+            success: true,
+            page: pageNumber,
+            totalPages: Math.ceil(totalOnboardings / limit),
+            totalOnboardings,
+            onboardings
+        });
+    } catch (error) {
+        console.error("Error fetching inventory transactions:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch inventory transactions",
+            error: error.message
+        });
+    }
+};
+
 export const completeOnBoardingInventoryController = async (req, res) => {
     const { inventoryTransactions, verifiedMaterials } = req;
 

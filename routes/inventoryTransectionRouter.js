@@ -26,7 +26,8 @@ import {
     revertWorkOrderController,
     getInventoryTransactionsByMaterial,
     completeOnBoardingInventoryController,
-    revertOnboaringController
+    revertOnboaringController,
+    getOnboarding
 } from '../controllers/inventoryTransectionController.js'
 
 const inventoryTransectionRouter = express.Router();
@@ -50,6 +51,8 @@ inventoryTransectionRouter.post('/work-order-revert/:id',
     createNewWorkOrderDocument,
     revertWorkOrderController
 );
+
+inventoryTransectionRouter.get('/get-onboarding/:page', getOnboarding);
 
 inventoryTransectionRouter.post('/onboarding-complete',
     verifyOnboardingItems,
