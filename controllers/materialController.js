@@ -18,7 +18,7 @@ const getMaterial = async (req, res) => {
                 measurement: val?.measurementId?.name || 'No unit',
                 unitQuantity: unitsSheets?.unitQuantity,
                 extraSheets: unitsSheets?.extraSheets,
-                measurementId : val?.measurementId?._id
+                measurementId: val?.measurementId?._id
             }
         })
 
@@ -158,5 +158,23 @@ const deleteMaterial = async (req, res) => {
         });
     }
 }
+
+export const getMaterialsCount = async (req, res) => {
+    try {
+        const count = await MaterialsModel.countDocuments();
+
+        res.status(200).json({
+            success: true,
+            count,
+        });
+    } catch (error) {
+        console.error('Error counting materials:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to get materials count',
+        });
+    }
+};
+
 
 export { getMaterial, createMaterial, updateMaterial, deleteMaterial };

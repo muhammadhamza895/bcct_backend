@@ -6,7 +6,7 @@ import { measureUnitVerifier } from '../middlewares/documentsVerifier.js';
 import { checkMaterialHasNoTransactions } from '../middlewares/materialMiddleware.js';
 
 // Controllers
-import { getMaterial, createMaterial, updateMaterial, deleteMaterial } from '../controllers/materialController.js';
+import { getMaterial, createMaterial, updateMaterial, deleteMaterial, getMaterialsCount } from '../controllers/materialController.js';
 
 const materialRouter = express.Router();
 
@@ -15,5 +15,8 @@ materialRouter.get('/get-material', getMaterial);
 materialRouter.post('/create-material', measureUnitVerifier, nameChecker, quantityVerification, createMaterial);
 materialRouter.put('/update-material/:id', measureUnitVerifier, nameChecker, quantityVerification, updateMaterial);
 materialRouter.delete('/delete-material/:id',checkMaterialHasNoTransactions, deleteMaterial);
+
+materialRouter.get('/get-material-count', getMaterialsCount);
+
 
 export { materialRouter };
