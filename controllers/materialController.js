@@ -18,7 +18,8 @@ const getMaterial = async (req, res) => {
                 measurement: val?.measurementId?.name || 'No unit',
                 unitQuantity: unitsSheets?.unitQuantity,
                 extraSheets: unitsSheets?.extraSheets,
-                measurementId: val?.measurementId?._id
+                measurementId: val?.measurementId?._id,
+                thresholdUnits: val?.thresholdUnits / sheetsPerUnit || 1
             }
         })
 
