@@ -159,3 +159,20 @@ export const deleteJob = async (req, res) => {
         });
     }
 };
+
+export const getJobsCount = async (req, res) => {
+    try {
+        const count = await JobModel.countDocuments();
+
+        res.status(200).json({
+            success: true,
+            count,
+        });
+    } catch (error) {
+        console.error('Error counting materials:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to get materials count',
+        });
+    }
+};
