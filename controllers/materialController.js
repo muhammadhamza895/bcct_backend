@@ -58,7 +58,7 @@ const createMaterial = async (req, res) => {
             name: trimmedName,
             measurementId: measurementId || null,
             totalSheets,
-            thresholdUnits: thresholdUnits*sheetsPerUnit
+            thresholdUnits: thresholdUnits * sheetsPerUnit
         });
 
         await newMaterial.save();
@@ -80,7 +80,7 @@ const createMaterial = async (req, res) => {
 const updateMaterial = async (req, res) => {
     try {
         const { id } = req.params;
-        let { name, measurementId, unitQuantity, extraSheets, thresholdUnits=1 } = req.body;
+        let { name, measurementId, unitQuantity, extraSheets, thresholdUnits = 1 } = req.body;
 
         const trimmedName = name?.trim();
 
@@ -105,7 +105,7 @@ const updateMaterial = async (req, res) => {
                 name: trimmedName,
                 measurementId,
                 totalSheets,
-                thresholdUnits: thresholdUnits*sheetsPerUnit
+                thresholdUnits: thresholdUnits * sheetsPerUnit
             },
             { new: true }
         );
@@ -178,6 +178,27 @@ export const getMaterialsCount = async (req, res) => {
         });
     }
 };
+
+export const getLowStockMaterials = async (req, res) => {
+    try {
+        const materials = await MaterialsModel.find({
+            $expr: { $lt: ['$totalSheets', '$thresholdUnits'] },
+        }).populate('measurementId', 'name sheetsPerUnit');
+
+        res.status(200).json({
+            success: true,
+            count: materials.length,
+            data: materials,
+        });
+    } catch (error) {
+        console.error('Error fetching low stock materials:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch low stock materials',
+        });
+    }
+};
+
 
 
 export { getMaterial, createMaterial, updateMaterial, deleteMaterial };
