@@ -13,7 +13,7 @@ const materialRouter = express.Router();
 // Routes
 materialRouter.get('/get-material', getMaterial);
 materialRouter.post('/create-material', measureUnitVerifier, nameChecker, quantityVerification, thresholdQuantityVerification, createMaterial);
-materialRouter.put('/update-material/:id', measureUnitVerifier, nameChecker, quantityVerification, updateMaterial);
+materialRouter.put('/update-material/:id', measureUnitVerifier, nameChecker, quantityVerification,thresholdQuantityVerification , updateMaterial);
 materialRouter.delete('/delete-material/:id', checkMaterialHasNoTransactions, deleteMaterial);
 
 materialRouter.get('/get-material-count', getMaterialsCount);

@@ -80,7 +80,7 @@ const createMaterial = async (req, res) => {
 const updateMaterial = async (req, res) => {
     try {
         const { id } = req.params;
-        let { name, measurementId, unitQuantity, extraSheets } = req.body;
+        let { name, measurementId, unitQuantity, extraSheets, thresholdUnits=1 } = req.body;
 
         const trimmedName = name?.trim();
 
@@ -104,7 +104,8 @@ const updateMaterial = async (req, res) => {
             {
                 name: trimmedName,
                 measurementId,
-                totalSheets
+                totalSheets,
+                thresholdUnits: thresholdUnits*sheetsPerUnit
             },
             { new: true }
         );
