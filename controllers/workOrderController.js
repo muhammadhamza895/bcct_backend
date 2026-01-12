@@ -191,3 +191,37 @@ export const deleteWorkOrder = async (req, res) => {
   }
 };
 
+export const getWorkOrderStatusCounts = async (req, res) => {
+  try {
+    const result = await WorkOrderModel.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const counts = {
+      pending: 0,
+      'in progress': 0,
+      completed: 0,
+    };
+
+    result.forEach((item) => {
+      counts[item._id] = item.count;
+    });
+
+    res.status(200).json({
+      success: true,
+      data: counts,
+    });
+  } catch (error) {
+    console.error('Error fetching work order counts:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch work order status counts',
+    });
+  }
+};
+
