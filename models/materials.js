@@ -10,9 +10,13 @@ const MaterialsSchema = new mongoose.Schema({
             return mongoose.Types.ObjectId.isValid(v) ? v : null;
         }
     },
-    totalSheets : {
-        type : Number,
-        default : 0
+    totalSheets: {
+        type: Number,
+        default: 0
+    },
+    thresholdUnits: {
+        type: Number,
+        default: 1
     }
 });
 

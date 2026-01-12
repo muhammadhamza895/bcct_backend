@@ -41,6 +41,32 @@ const quantityVerification = (req, res, next) => {
     }
 };
 
+export const thresholdQuantityVerification = (req, res, next) => {
+    try {
+        let { thresholdUnits } = req.body;
+
+        if (thresholdUnits !== undefined) {
+            thresholdUnits = parseInt(thresholdUnits, 10);
+
+            if (Number.isNaN(thresholdUnits) || thresholdUnits <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid threshold Units value'
+                });
+            }
+
+            req.body.thresholdUnits = thresholdUnits;
+        }
+
+        next();
+    } catch (error) {
+        console.error('Error verifying quantities:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error verifying quantities'
+        });
+    }
+};
 
 const sheetsPerUnitVerification = (req, res, next) => {
     try {
@@ -64,7 +90,6 @@ const sheetsPerUnitVerification = (req, res, next) => {
         });
     }
 }
-
 
 const uniqueMeasurementVerifier = async (req, res, next) => {
     try {
@@ -117,7 +142,6 @@ const sheetToUnitConverter = ({ sheetsPerUnit = 1, totalSheets = 1 }) => {
 const calculateTotalSheets = ({ unitQuantity, sheetsPerUnit, extraSheets }) => {
     return (unitQuantity * sheetsPerUnit) + extraSheets
 }
-
 
 const nameChecker = (req, res, next) => {
     const { name } = req?.body

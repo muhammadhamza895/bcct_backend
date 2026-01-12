@@ -38,7 +38,7 @@ const getMaterial = async (req, res) => {
 
 const createMaterial = async (req, res) => {
     try {
-        let { name, measurementId, unitQuantity = 0, extraSheets = 0 } = req.body;
+        let { name, measurementId, unitQuantity = 0, extraSheets = 0, thresholdUnits = 1 } = req.body;
 
         const trimmedName = name?.trim();
 
@@ -56,7 +56,8 @@ const createMaterial = async (req, res) => {
         const newMaterial = new MaterialsModel({
             name: trimmedName,
             measurementId: measurementId || null,
-            totalSheets
+            totalSheets,
+            thresholdUnits: thresholdUnits*sheetsPerUnit
         });
 
         await newMaterial.save();
