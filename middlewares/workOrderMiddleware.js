@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { InventoryTransactionModel } from "../models/inventoryTransection.js";
+import { WorkOrderModel } from "../models/workOrder.js";
 
 export const checkPriority = (req, res, next) => {
     const { priority } = req.body;
@@ -95,7 +96,7 @@ export const checkPendingStatus = async (req, res, next) => {
 
 export const checkWorkOrderUsedInInventory = async (req, res, next) => {
     try {
-        const { id } = req.params; 
+        const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({
@@ -138,6 +139,34 @@ export const checkWorkOrderId = (req, res, next) => {
 
     next();
 };
+
+export const checkWorkIDExistence = async (req, res, next) => {
+    try {
+        const { work_id } = req.body;
+
+        const workOrder = await WorkOrderModel.findOne({
+            work_id: String(work_id),
+            status: { $ne: 'reverted' },
+        });
+
+        if (workOrder) {
+            return res.status(409).json({
+                success: false,
+                exists: true,
+                message: 'Work Order already exists',
+            });
+        }
+
+        next()
+    } catch (error) {
+        console.error('Error checking work order existence:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Server error',
+        });
+    }
+};
+
 
 
 
