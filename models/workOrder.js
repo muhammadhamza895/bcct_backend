@@ -27,7 +27,6 @@ const WorkOrderSchema = new mongoose.Schema(
         work_id: {
             type: String,
             required: true,
-            unique: true,
             index: true
         },
         description: {

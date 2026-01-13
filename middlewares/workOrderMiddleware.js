@@ -126,7 +126,7 @@ export const checkWorkOrderUsedInInventory = async (req, res, next) => {
     }
 };
 
-export const checkJobId = (req, res, next) => {
+export const checkWorkOrderId = (req, res, next) => {
     const { work_id } = req.body;
 
     if (!work_id) {

@@ -32,7 +32,7 @@ export const getWorkOrdersByPage = async (req, res) => {
 
 export const createWorkOrder = async (req, res) => {
   try {
-    const { job, work_id ,description, priority, tasks, deliveryDate } = req.body;
+    const { job, work_id, description, priority, tasks, deliveryDate } = req.body;
 
     const workOrder = await WorkOrderModel.create({
       job,
@@ -225,4 +225,36 @@ export const getWorkOrderStatusCounts = async (req, res) => {
     });
   }
 };
+
+export const getWorkOrdersById = async (req, res) => {
+  try {
+    const work_id = req.body.work_id;
+
+    const workOrder = await WorkOrderModel.findOne({
+      work_id : String(work_id),
+      status: { $ne: 'reverted' }
+    })
+
+    if (!workOrder) {
+      return res.status(404).send({
+        success: false,
+        message: 'Work Order not found'
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      page: 1,
+      totalPages: 1,
+      totalWorkOrders: 1,
+      workOrder,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch Work Order",
+      error: error.message
+    });
+  }
+}
 
