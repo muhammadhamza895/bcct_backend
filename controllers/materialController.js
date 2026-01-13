@@ -199,6 +199,41 @@ export const getLowStockMaterials = async (req, res) => {
     }
 };
 
+export const getMaterialForDashboard = async (req, res) => {
+    try {
+        const materials = await MaterialsModel.find().populate('measurementId').limit(7);
+
+        const data = materials?.map(val => {
+            const sheetsPerUnit = val?.measurementId?.sheetsPerUnit
+            const totalSheets = val?.totalSheets
+
+
+            const unitsSheets = sheetToUnitConverter({ sheetsPerUnit, totalSheets })
+            return {
+                _id: val?._id,
+                name: val?.name,
+                measurement: val?.measurementId?.name || 'No unit',
+                unitQuantity: unitsSheets?.unitQuantity,
+                extraSheets: unitsSheets?.extraSheets,
+                measurementId: val?.measurementId?._id,
+                thresholdUnits: val?.thresholdUnits / sheetsPerUnit || 1
+            }
+        })
+
+        res.status(200).json({
+            success: true,
+            message: 'Materials fetched successfully',
+            materials: data
+        });
+    } catch (error) {
+        console.error('Error fetching materials:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching materials'
+        });
+    }
+}
+
 
 
 export { getMaterial, createMaterial, updateMaterial, deleteMaterial };

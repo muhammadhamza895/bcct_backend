@@ -6,7 +6,7 @@ import { measureUnitVerifier } from '../middlewares/documentsVerifier.js';
 import { checkMaterialHasNoTransactions } from '../middlewares/materialMiddleware.js';
 
 // Controllers
-import { getMaterial, createMaterial, updateMaterial, deleteMaterial, getMaterialsCount, getLowStockMaterials } from '../controllers/materialController.js';
+import { getMaterial, createMaterial, updateMaterial, deleteMaterial, getMaterialsCount, getLowStockMaterials, getMaterialForDashboard } from '../controllers/materialController.js';
 
 const materialRouter = express.Router();
 
@@ -18,6 +18,8 @@ materialRouter.delete('/delete-material/:id', checkMaterialHasNoTransactions, de
 
 materialRouter.get('/get-material-count', getMaterialsCount);
 materialRouter.get('/get-material-low-stock', getLowStockMaterials);
+materialRouter.get('/get-material-dashboard', getMaterialForDashboard);
+
 
 
 export { materialRouter };
