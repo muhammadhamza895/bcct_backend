@@ -32,10 +32,11 @@ export const getWorkOrdersByPage = async (req, res) => {
 
 export const createWorkOrder = async (req, res) => {
   try {
-    const { job, description, priority, tasks, deliveryDate } = req.body;
+    const { job, work_id ,description, priority, tasks, deliveryDate } = req.body;
 
     const workOrder = await WorkOrderModel.create({
       job,
+      work_id,
       description,
       priority,
       tasks,
