@@ -19,7 +19,9 @@ const getMaterial = async (req, res) => {
                 unitQuantity: unitsSheets?.unitQuantity,
                 extraSheets: unitsSheets?.extraSheets,
                 measurementId: val?.measurementId?._id,
-                thresholdUnits: val?.thresholdUnits / sheetsPerUnit || 1
+                thresholdUnits: val?.thresholdUnits / sheetsPerUnit || 1,
+                sheetsPerUnit: val?.measurementId?.sheetsPerUnit,
+                totalSheets: val?.totalSheets
             }
         })
 
@@ -185,10 +187,29 @@ export const getLowStockMaterials = async (req, res) => {
             $expr: { $lt: ['$totalSheets', '$thresholdUnits'] },
         }).populate('measurementId', 'name sheetsPerUnit');
 
+        const data = materials?.map(val => {
+            const sheetsPerUnit = val?.measurementId?.sheetsPerUnit
+            const totalSheets = val?.totalSheets
+
+
+            const unitsSheets = sheetToUnitConverter({ sheetsPerUnit, totalSheets })
+            return {
+                _id: val?._id,
+                name: val?.name,
+                measurement: val?.measurementId?.name || 'No unit',
+                unitQuantity: unitsSheets?.unitQuantity,
+                extraSheets: unitsSheets?.extraSheets,
+                measurementId: val?.measurementId?._id,
+                thresholdUnits: val?.thresholdUnits / sheetsPerUnit || 1,
+                sheetsPerUnit: val?.measurementId?.sheetsPerUnit,
+                totalSheets: val?.totalSheets
+            }
+        })
+
         res.status(200).json({
             success: true,
             count: materials.length,
-            data: materials,
+            data: data,
         });
     } catch (error) {
         console.error('Error fetching low stock materials:', error);
@@ -216,7 +237,9 @@ export const getMaterialForDashboard = async (req, res) => {
                 unitQuantity: unitsSheets?.unitQuantity,
                 extraSheets: unitsSheets?.extraSheets,
                 measurementId: val?.measurementId?._id,
-                thresholdUnits: val?.thresholdUnits / sheetsPerUnit || 1
+                thresholdUnits: val?.thresholdUnits / sheetsPerUnit || 1,
+                sheetsPerUnit: val?.measurementId?.sheetsPerUnit,
+                totalSheets: val?.totalSheets
             }
         })
 
