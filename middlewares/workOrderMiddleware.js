@@ -126,5 +126,18 @@ export const checkWorkOrderUsedInInventory = async (req, res, next) => {
     }
 };
 
+export const checkJobId = (req, res, next) => {
+    const { work_id } = req.body;
+
+    if (!work_id) {
+        return res.status(400).json({
+            success: false,
+            message: "Work ID is required"
+        });
+    }
+
+    next();
+};
+
 
 
