@@ -452,7 +452,8 @@ export const createNewWorkOrderDocument = (req, res, next) => {
         description: workOrder?.description || "",
         priority: workOrder.priority,
         tasks: workOrder.tasks,
-        deliveryDate: workOrder.deliveryDate
+        deliveryDate: workOrder.deliveryDate,
+        work_id: workOrder.work_id
     }
 
     const newWorkOrder = new WorkOrderModel(newWorkOrderData)
