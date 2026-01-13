@@ -55,7 +55,10 @@ export const getJobsById = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            job
+            page: 1,
+            totalPages: 1,
+            totalJobs: 1,
+            job,
         });
     } catch (error) {
         res.status(500).json({
